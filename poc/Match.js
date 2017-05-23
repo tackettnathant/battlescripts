@@ -24,11 +24,6 @@ const Match = function (game, players, config, arbiter) {
   Object.assign(this.config, config || {});
   this.reset_results(); //Results Container
 
-  // Connect the flow using pub/sub
-  this.arbiter.subscribe("start.game", ()=> {
-    this.start_game();
-  });
-
 };
 
 Match.prototype.start = function (scenario) {
