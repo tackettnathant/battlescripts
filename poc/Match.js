@@ -1,12 +1,34 @@
 "use strict";
-const Arbiter = require('promissory-arbiter');
 
 const Match = function (game, players, config, arbiter) {
   this.game = game || this.die("No game passed to start()");
   this.players = players || this.die("No players passed to start()");
-  this.arbiter = arbiter || Arbiter || this.die("An Arbiter is required for pub/sub");
-  this.publish = this.arbiter.publish;
-  this.subscribe = this.arbiter.subscribe;
+  
+  // Simple pub/sub
+  let pubsub = {}, pubsub_id=0;
+  this.subscribe = function(topic,func) {
+    if (!pubsub[topic]) {
+      pubsub[topic]=[];
+    }
+    let id = pubsub_id++;
+    pubsub[topic].push({
+      id:id,
+      func:func
+    });
+    return id;
+  };
+  this.publish = function(topic,data) {
+    if (!pubsub[topic]) { return false; }
+    setTimeout(()=>{
+      (pubsub[topic] || []).forEach((subscriber)=>{
+        subscriber.func(data,topic);
+      });
+    },0);
+    return true;
+  };
+  this.unsubscribe = function(id) {
+    // TODO
+  };
 
   this.started = false;
   // These are to be implemented later for games that allow multiple players to move on the same turn
@@ -32,7 +54,7 @@ Match.prototype.start = function (scenario) {
   }
   this.log("Starting Match");
   // Tell the world a match is starting
-  this.arbiter.publish("match.start", {"config": this.config, "scenario": this.scenario});
+  this.publish("match.start", {"config": this.config, "scenario": this.scenario});
 
   this.scenario = scenario || {};
   this.reset_results();
@@ -62,12 +84,12 @@ Match.prototype.start = function (scenario) {
 
 Match.prototype.start_game = function () {
   // Tell the world a game is starting
-  this.arbiter.publish("game.start", this.results);
+  this.publish("game.start", this.results);
 
   // Tell the Game to start a new game
   // It can optionally return data to tell each player when they start
   let game_data = this.game.start_game(this.results) || [];
-  this.arbiter.publish("game.setup", game_data.player_data);
+  this.publish("game.setup", game_data.player_data);
   this.players.forEach(function (p, i) {
     if (typeof p.start_game != "function") {
       return;
@@ -137,8 +159,8 @@ Match.prototype.end_game = function (game_results) {
     p.end_game(game_results);
   });
 
-  this.arbiter.publish("game.end", game_results);
-  this.arbiter.publish("match.results", this.results);
+  this.publish("game.end", game_results);
+  this.publish("match.results", this.results);
 
   if (this.results.current_game < this.results.total_games) {
     setTimeout(()=>{ this.start_game(); },0);
@@ -161,8 +183,8 @@ Match.prototype.end_match = function () {
   this.results.current_game = 0;
   this.started = false;
 
-  this.arbiter.publish("match.end", this.results);
-  this.arbiter.publish("match.results", this.results);
+  this.publish("match.end", this.results);
+  this.publish("match.results", this.results);
 };
 
 Match.prototype.render = function(new_game) {
@@ -175,7 +197,7 @@ Match.prototype.render = function(new_game) {
     }
     this.results.render_history[this.results.current_game].push(state);
   }
-  this.arbiter.publish("game.render", state);
+  this.publish("game.render", state);
 };
 
 Match.prototype.reset_results = function () {
@@ -187,12 +209,12 @@ Match.prototype.reset_results = function () {
     draws: 0,
     render_history: []
   };
-  this.arbiter.publish("match.results", this.results);
+  this.publish("match.results", this.results);
 };
 
 Match.prototype.log = function (message) {
   console.log(message);
-  this.arbiter.publish("match.log", typeof s === "object" ? JSON.stringify(message) : message);
+  this.publish("match.log", typeof s === "object" ? JSON.stringify(message) : message);
 };
 
 Match.prototype.die = function (msg) {
