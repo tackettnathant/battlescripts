@@ -17,12 +17,26 @@ var module={}; // To allow module.exports not to fail
 
 <h1>Battle Scripts</h1>
 
+Your Player Code:<br>
+<textarea id="code" style="float:left;height:200px;width:500px;margin:10px;border:1px solid black;white-space:pre;">
+// A stupid player that takes the first available move
+function () {
+  this.move = function (board) {
+    for (var i = 0; i < 9; i++) {
+      if (board[i] == -1) {
+        return i;
+      }
+    }
+  }
+}
+</textarea>
 <div class="criteria">
     Number of games: <input id="num-games" value="5" size="4"><br>
-    Move delay: <input id="move-delay" value="250" size="5"><br>
+    Move delay: <input id="move-delay" value="50" size="5"><br>
     Time limit: <input id="time-limit" value="0" size="5"><br>
 </div>
 <button onClick="start_match()">Start</button>
+<br style="clear:both;"/>
 
 <div id="canvas" ng-app="" ng-controller="CanvasController"></div>
 
@@ -44,7 +58,9 @@ function CanvasController($scope,$compile) {
 var start_match = function() {
       // START THE MATCH!!!
 		var game = new Game();
-      var players = [ new player_random(), new player_random() ];
+		var p1_code = $('#code').val();
+		var p1 = eval("(" + p1_code + ")");
+      var players = [ new p1(), new player_random() ];
       
       var match = new Match(game, players,{
         total_games: parseInt($('#num-games').val(), 10),
