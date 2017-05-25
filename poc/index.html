@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>Battle Scripts</title>
+  
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type='text/javascript' src='js/angular.js'></script>
+<script>
+var module={}; // To allow module.exports not to fail
+</script>
+<script type='text/javascript' src='Match.js'></script>
+<script type='text/javascript' src='games/tic-tac-toe/game.js'></script>
+<script type='text/javascript' src='games/tic-tac-toe/players/random.js'></script>
+</head>
+<body>
+
+<h1>Battle Scripts</h1>
+
+<div class="criteria">
+    Number of games: <input id="num-games" value="5" size="4"><br>
+    Move delay: <input id="move-delay" value="250" size="5"><br>
+    Time limit: <input id="time-limit" value="0" size="5"><br>
+</div>
+<button onClick="start_match()">Start</button>
+
+<div id="canvas" ng-app="" ng-controller="CanvasController"></div>
+
+<script>
+$(function() {
+    var scope = angular.element("#canvas").scope();
+    $.get("games/tic-tac-toe/canvas.html",function(template) {
+        scope.load(template);
+    });
+});
+function CanvasController($scope,$compile) {
+    $scope.load = function(content) {
+        var canvas = document.getElementById('canvas');
+        canvas.innerHTML = content;
+        $compile(canvas)($scope);
+        $scope.$apply();
+    };
+}
+var start_match = function() {
+      // START THE MATCH!!!
+		var game = new Game();
+      var players = [ new player_random(), new player_random() ];
+      
+      var match = new Match(game, players,{
+        total_games: parseInt($('#num-games').val(), 10),
+        move_delay: parseInt($("#move-delay").val(), 10),
+        time_limit: parseInt($("#time-limit").val(), 10),
+		render_history:true
+      });
+	  
+      match.subscribe("game.render", function(data) {
+        var $scope = angular.element('#canvas').scope();
+        if ($scope) {
+            $scope.$apply(function() {
+                $scope.game = data;
+            });
+		}
+        else {
+            console.log("$scope not found");
+		}
+
+    });
+    match.subscribe("match.results", function(results) {
+        var $scope = angular.element('#canvas').scope();
+        if ($scope) {
+            $scope.$apply(function() {
+                $scope.results = results;
+            });
+		}
+        else {
+            console.log("$scope not found");
+		}
+    });
+
+      match.start({});
+    };
+
+</script>
+
+
+</body>
+</html>
+

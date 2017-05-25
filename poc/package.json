@@ -9,6 +9,6 @@
   "author": "Matt Kruse <github@mattkruse.com> (http://mattkruse.com/)",
   "license": "ISC",
   "dependencies": {
-
+    "express": "^4.15.3"
   }
 }

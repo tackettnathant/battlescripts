@@ -1,4 +1,4 @@
-module.exports = function () {
+const Game = function () {
   this.state = {
     board: []
   };
@@ -35,7 +35,7 @@ module.exports = function () {
     }
     else {
       // Otherwise return JSON for rendering by the host environment
-      return b;
+      return {board:b};
     }
   };
 
@@ -84,4 +84,5 @@ module.exports = function () {
     return false;
   };
 
-}
+};
+module.exports = Game;

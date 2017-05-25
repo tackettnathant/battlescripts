@@ -1,9 +1,9 @@
 "use strict";
 
-const Match = function (game, players, config, arbiter) {
+const Match = function (game, players, config) {
   this.game = game || this.die("No game passed to start()");
   this.players = players || this.die("No players passed to start()");
-  
+
   // Simple pub/sub
   let pubsub = {}, pubsub_id=0;
   this.subscribe = function(topic,func) {
@@ -71,9 +71,9 @@ Match.prototype.start = function (scenario) {
       return;
     }
     p.start_match({
-      "player_number": i,
-      "config": this.config,
-      "data": this.match_data
+      player_number: i,
+      total_games: this.config.total_games,
+      data: this.match_data
     });
   })
   ;
