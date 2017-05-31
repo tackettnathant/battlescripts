@@ -3,7 +3,7 @@
  A console-based host environment POC for Node
 
  */
-var Match = require('./Match.js');
+var Match = require('./public_html/js/Match.js');
 var Game = require('./games/tic-tac-toe/game.js');
 var RandomPlayer = require('./games/tic-tac-toe/players/random.js');
 

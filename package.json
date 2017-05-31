@@ -9,6 +9,7 @@
   "author": "Matt Kruse <github@mattkruse.com> (http://mattkruse.com/)",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.15.3"
+    "express": "^4.15.3",
+    "simple-fs-rest": "^1.0.5"
   }
 }
