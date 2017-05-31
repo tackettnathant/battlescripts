@@ -28,6 +28,7 @@ var GameUtil = {
 const Connect4 = function () {
   // A 7x6 array to represent the board
   this.state = [ [],[],[],[],[],[],[] ];
+  this.winning_moves = [ [],[],[],[],[],[],[] ];
   this.current_player = 0;
   this.first_player = 0;
   this.last_move = null;
@@ -77,20 +78,24 @@ const Connect4 = function () {
     // winning lines need to be next to each other in any direction
     // Search outward from the last move
     let checks = [
-      [ [-1,0],[1,0] ]
-      ,[[0,-1],[0,1] ]
-      ,[[-1,-1],[1,1] ]
-      ,[[-1,1],[1,-1] ]
+       [ [-1, 0],[1, 0] ]
+      ,[ [ 0,-1],[0, 1] ]
+      ,[ [-1,-1],[1, 1] ]
+      ,[ [-1, 1],[1,-1] ]
     ];
     for (let i=0; i<checks.length; i++) {
       let check = checks[i];
       //console.log(`Checking ${check}\n`);
       let total=1; // total squares counted in line
+      this.winning_moves = [ [],[],[],[],[],[],[] ];
+      this.winning_moves[move_col][move_row]=true;
+
       for (let j=0; j<=1; j++) {
         let c = move_col + check[j][0];
         let r = move_row + check[j][1];
         while (is_player(c, r)) {
           total++;
+          this.winning_moves[c][r]=true;
           c = c + check[j][0];
           r = r + check[j][1];
         }
@@ -102,7 +107,17 @@ const Connect4 = function () {
         }
       }
     }
-    return false;
+    this.winning_moves = [ [],[],[],[],[],[],[] ];
+    //Check for Draw
+    for (let i=0; i<7; i++) {
+      if (this.state[i].length<6) {
+        return false;
+      }
+    }
+    // If we got here, it's a draw
+    return {
+      draw:true
+    };
   };
 
   // Handle a player move
@@ -126,7 +141,18 @@ const Connect4 = function () {
     for (let i=5; i>=0; i--) {
       let row=[];
       for (let col=0; col<7; col++) {
-        row.push( typeof this.state[col][i]=="undefined" ? " " : ["X","O"][this.state[col][i]] );
+        if (typeof this.state[col][i]=="undefined") {
+          row.push(" ");
+        }
+        else {
+          var p = this.state[col][i];
+          if (this.winning_moves[col][i]) {
+            row.push(["X", "O"][p]);
+          }
+          else {
+            row.push(["x", "o"][p]);
+          }
+        }
       }
       board += row.join("|")+"\n";
     }

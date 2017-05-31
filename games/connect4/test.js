@@ -9,8 +9,8 @@ var game = new Game();
 var match = new Match(game, [player1, player2], {
   "total_games": 1,
   "render_type": "text/plain",
-  "move_delay": 300,
-  "render_history": true
+  "move_delay": 0,
+  "render_history": false
 });
 
 // We show what's happening by subscribing to events published by Match
