@@ -22,7 +22,7 @@ var module={}; // To allow module.exports not to fail
 <a href="/">Home</a>
 
 <script>
-  bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", "$compile", function($scope, $battlescripts, $queryparam, $compile) {
+  bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", "$compile", "$timeout", function($scope, $battlescripts, $queryparam, $compile, $timeout) {
     var id = $queryparam.get('id');
     var game_id = $queryparam.get('game_id');
     $scope.id=id;
@@ -35,13 +35,11 @@ var module={}; // To allow module.exports not to fail
     // Load game
     $battlescripts.get_game(game_id).then((game)=> {
       $scope.game = game;
-      $(()=>{
-        var canvas = document.getElementById('canvas');
-        canvas.innerHTML = $scope.game.canvas;
-        var $canvas_scope = angular.element('#canvas').scope();
+      // Populate and compile the Game canvas
+        var canvas = angular.element('#canvas');
+        canvas.html($scope.game.canvas);
+        var $canvas_scope = canvas.scope();
         $compile(canvas)($canvas_scope);
-        $canvas_scope.$apply();
-      })
     });
 
     // Load player
@@ -80,7 +78,9 @@ var module={}; // To allow module.exports not to fail
         var game = new Game();
         var p1_code = $scope.player.source;
         var p1 = eval("(" + p1_code + ")");
-        var players = [ new p1(), new p1() ];
+        var p2_code = $scope.opponent.source;
+        var p2 = eval("(" + p2_code + ")");
+        var players = [ new p1(), new p2() ];
 
         var match = new Match(game, players,{
           total_games: 1,
@@ -123,8 +123,8 @@ var module={}; // To allow module.exports not to fail
 
 </script>
 
-<div ng-if="id && !player">Loading...</div>
-<div ng-if="!id || player">
+<div ng-show="id && !player">Loading...</div>
+<div ng-show="!id || player">
     <div>
         <button ng-click="save()">Save</button>
         <button ng-click="delete()">Delete</button>
