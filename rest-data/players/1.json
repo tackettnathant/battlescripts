@@ -1,0 +1,7 @@
+{
+   "game_id": "1",
+   "source": "function () {\n  this.move = function (board) {\n    for (var i = 3; i < 9; i++) {\n      if (board[i] == -1) {\n        return i;\n      }\n    }\n  }\n}",
+   "name": "Stupid Player",
+   "id": 1,
+   "description": "A stupid player that takes the first available move"
+}
