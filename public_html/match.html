@@ -14,146 +14,116 @@
 var module={}; // To allow module.exports not to fail
 </script>
 <script type='text/javascript' src='/lib/Match.js'></script>
-<script type='text/javascript' src='/games/tic-tac-toe/game.js'></script>
-<script type='text/javascript' src='/games/tic-tac-toe/players/random.js'></script>
 </head>
 <body ng-app="battlescripts" ng-controller="ScreenController">
 
-<h1>Player Editor : {{game.name}}</h1>
+<h1>Play A Game</h1>
 
 <a href="/">Home</a>
+<br style="clear:both;">
 
 <script>
-  bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", function($scope, $battlescripts, $queryparam) {
-    var id = $queryparam.get('id');
-    var game_id = $queryparam.get('game_id');
-    $scope.id=id;
-    $scope.game_id = game_id;
-    $scope.player = null;
+  bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", "$compile", function($scope, $battlescripts, $queryparam, $compile) {
+    $scope.game_id = $queryparam.get('game_id');
+    $scope.players = [];
+    $scope.player_list = [];
+    $scope.games = null;
     $scope.game = null;
-
-    // Load game
-    $battlescripts.get_game(game_id).then(
-      game => $scope.game=game
-    );
-    // Load player
-    if (!!id) {
-      $battlescripts.get_player(id).then(
-        player => $scope.player=player
-      );
-    }
-    else {
-      $scope.player = {};
-    }
-
-    $scope.save = function() {
-      $battlescripts.save_game($scope.player).then(
-        updated_player => $scope.player=updated_player
-      );
+    $scope.options = {
+      total_games:10,
+      move_delay:100,
+      render_history:true
     };
 
-    $scope.delete = function() {
-      if (confirm("Are you sure?")) {
-        $battlescripts.delete_player($scope.player).then(()=>{
-          window.location.href="/";
-        });
-      }
+    $battlescripts.get_all_games().then( games=>$scope.games=games );
+    if ($scope.game_id) {
+      $battlescripts.get_game($scope.game_id).then(
+        game => $scope.game=game
+      );
     }
+    $scope.$watch('game', function() {
+      if ($scope.game) {
+        // Initialize the canvas
+        var canvas = angular.element('#canvas');
+        canvas.html($scope.game.canvas);
+        var $canvas_scope = canvas.scope();
+        $compile(canvas)($canvas_scope);
+
+        // Initialize the players array
+        $scope.players = new Array($scope.game.max_players).fill(null);
+
+        // Retrieve a list of available players for this game
+        $battlescripts.search_players({"game_id":$scope.game.id}).then(
+          players=>$scope.player_list=players
+        )
+      }
+    });
+
+    $scope.start = function() {
+        var Game = eval($scope.game.source);
+        var game = new Game();
+        var players = [];
+        $scope.players.forEach( p=>{
+          var code = eval("("+p.source+")");
+          players.push( new code() );
+        });
+
+        var match = new Match(game, players,$scope.options);
+        match.subscribe("game.render", function(data) {
+          var scope = angular.element('#canvas').scope();
+          if (scope) {
+            scope.$apply(function() {
+              scope.game = data;
+            });
+          }
+          else {
+            console.log("$scope not found");
+          }
+
+        });
+        match.subscribe("match.results", function(results) {
+          var scope = angular.element('#canvas').scope();
+          if (scope) {
+            scope.$apply(function() {
+              scope.results = results;
+            });
+          }
+          else {
+            console.log("$scope not found");
+          }
+        });
+
+        match.start({});
+      };
   }]);
 </script>
 
-<div ng-if="id && !player">Loading...</div>
-<div ng-if="!id || player">
-    <div>
-        <button ng-click="save()">Save</button>
-        <button ng-click="delete()">Delete</button>
+<div style="float:left;width:200px;min-height:600px;">
+    <h3>Game Options</h3>
+    <div style="margin:10px;">
+        Game: <select ng-options="g as g.name for g in games track by g.id" ng-model="game"></select>
     </div>
-    <div>Name: <input ng-model="player.name"> (id: {{player.id}})</div>
-    <div>Source</div>
-    <div>
-        <textarea style="width:800px;height:300px;" ng-model="player.source"></textarea>
+    <div style="margin:10px;">
+        <div>Players:</div>
+        <div ng-repeat="p in players track by $index">
+            <select ng-options="p as p.name for p in player_list track by p.id" ng-model="players[$index]"></select>
+        </div>
+    </div>
+    <div style="margin:10px;">
+        <div>Options:</div>
+        Number of games: <input ng-model="options.total_games" size="4"><br>
+        Move delay: <input ng-model="options.move_delay" size="5"><br>
+        <button ng-click="start()">Start</button>
+
     </div>
 </div>
-
-Your Player Code:<br>
-<textarea id="code" style="float:left;height:200px;width:500px;margin:10px;border:1px solid black;white-space:pre;">
-// A stupid player that takes the first available move
-function () {
-  this.move = function (board) {
-    for (var i = 0; i < 9; i++) {
-      if (board[i] == -1) {
-        return i;
-      }
-    }
-  }
-}
-</textarea>
-<div class="criteria">
-    Number of games: <input id="num-games" value="5" size="4"><br>
-    Move delay: <input id="move-delay" value="50" size="5"><br>
-    Time limit: <input id="time-limit" value="0" size="5"><br>
+<div id="canvas" ng-controller="CanvasController" style="float:left;width:800px;height:600px;border:1px solid black;margin:10px;">
+    CANVAS
 </div>
-<button onClick="start_match()">Start</button>
-<br style="clear:both;"/>
-
-<div id="canvas" ng-controller="CanvasController"></div>
-
 <script>
 bsapp.controller("CanvasController", ["$scope", "$battlescripts", "$timeout", "Restangular", "$compile", function($scope, $battlescripts, $timeout, Restangular, $compile) {
-    $scope.load = function(content) {
-        var canvas = document.getElementById('canvas');
-        canvas.innerHTML = content;
-        $compile(canvas)($scope);
-        $scope.$apply();
-    };
 
-    $.get("games/tic-tac-toe/canvas.html",function(template) {
-//        $scope.load(template);
-    });
-	
 }]);
-
-var start_match = function() {
-      // START THE MATCH!!!
-		var game = new Game();
-		var p1_code = $('#code').val();
-		var p1 = eval("(" + p1_code + ")");
-      var players = [ new p1(), new player_random() ];
-      
-      var match = new Match(game, players,{
-        total_games: parseInt($('#num-games').val(), 10),
-        move_delay: parseInt($("#move-delay").val(), 10),
-        time_limit: parseInt($("#time-limit").val(), 10),
-		render_history:true
-      });
-	  
-      match.subscribe("game.render", function(data) {
-        var $scope = angular.element('#canvas').scope();
-        if ($scope) {
-            $scope.$apply(function() {
-                $scope.game = data;
-            });
-		}
-        else {
-            console.log("$scope not found");
-		}
-
-    });
-    match.subscribe("match.results", function(results) {
-        var $scope = angular.element('#canvas').scope();
-        if ($scope) {
-            $scope.$apply(function() {
-                $scope.results = results;
-            });
-		}
-        else {
-            console.log("$scope not found");
-		}
-    });
-
-      match.start({});
-    };
-
 </script>
 
 

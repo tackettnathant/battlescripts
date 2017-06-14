@@ -59,6 +59,7 @@ bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam",
         <button ng-click="delete()">Delete</button>
     </div>
     <div>Name: <input ng-model="game.name"> (id: {{game.id}})</div>
+    <div>Max Players: <input type="number" min="2" ng-model="game.max_players"></div>
     <div>Source</div>
     <div>
         <textarea style="width:800px;height:300px;" ng-model="game.source"></textarea>
