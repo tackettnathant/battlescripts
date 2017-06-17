@@ -64,8 +64,7 @@ var module={}; // To allow module.exports not to fail
         var game = new Game();
         var players = [];
         $scope.players.forEach( p=>{
-          var code = eval("("+p.source+")");
-          players.push( new code() );
+          players.push( new $battlescripts.Player(p.source) );
         });
 
         var match = new Match(game, players,$scope.options);
