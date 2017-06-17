@@ -168,6 +168,33 @@ bsapp.factory('$battlescripts', function(Restangular) {
       return player.remove();
     }
   };
+
+  // UTIL methods
+  // ------------
+
+  // A wrapper to create a Player object from code and enable debugging, etc.
+  api.Player = function(code,debug_functions) {
+    var p = eval("("+code+")");
+    debug_functions = debug_functions || {};
+    this.player = new p();
+    this.move = function(data) {
+      var player_move = null;
+      // Debugger functions (if defined) can return promises (async) or values (sync)
+      return Promise.resolve( debug_functions.before_move ? debug_functions.before_move(data) : null)
+        .then((changed_data)=>{
+          player_move = this.player.move(changed_data || data);
+          return debug_functions.after_move ? debug_functions.after_move(player_move) : player_move;
+        }).then((changed_player_move)=>{
+          return (typeof changed_player_move!=="undefined")?changed_player_move:player_move;
+        });
+    };
+    this.error = function(err) {
+      return this.player.error(err);
+    };
+  };
+
+  // TODO: Wrapper function for Game debugging?
+
   return api;
 });
 
