@@ -10,6 +10,12 @@
     <script type='text/javascript' src='js/lodash.js'></script>
     <script type='text/javascript' src='js/restangular.js'></script>
     <script type='text/javascript' src='js/battlescripts-app.js'></script>
+
+    <script type="text/javascript" src="/lib/codemirror-3.20/lib/codemirror.js"></script>
+    <script type="text/javascript" src="/lib/codemirror-3.20/mode/javascript/javascript.js"></script>
+    <link rel="stylesheet" href="/lib/codemirror-3.20/lib/codemirror.css" />
+    <link rel="stylesheet" href="/lib/codemirror-3.20/theme/mdn-like.css" />
+
     <script>
     var module={}; // To allow module.exports not to fail
     </script>
@@ -24,6 +30,21 @@
         $scope.game = null;
         $scope.opponents = [];
         $scope.opponent = null;
+
+        // Editor config
+        $scope.conf = {
+          mode: "javascript",
+          theme: "mdn-like",
+          indentUnit: 2,
+          smartIndent: true,
+          tabSize: 2,
+          indentWithTabs: false,
+          electricChars: true,
+          lineWrapping: false,
+          lineNumbers: true,
+          undoDepth: 10,
+          historyEventDelay: 200
+        };
 
         // Load game
         $battlescripts.get_game(game_id).then((game)=> {
@@ -239,7 +260,7 @@
     <div class="panel source">
         <h2>Source Editor</h2>
         <div>
-            <textarea style="width:90%;height:300px;" ng-model="player.source"></textarea>
+            <textarea codemirror="conf" style="width:90%;height:300px;" ng-model="player.source"></textarea>
         </div>
     </div>
     <div class="panel test">
