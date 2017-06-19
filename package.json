@@ -10,7 +10,6 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.15.3",
-    "gulp": "^3.9.1",
-    "simple-fs-rest": "^1.0.5"
+    "gulp": "^3.9.1"
   }
 }
