@@ -9,6 +9,8 @@
 <script type='text/javascript' src='js/angular-resource.js'></script>
 <script type='text/javascript' src='js/lodash.js'></script>
 <script type='text/javascript' src='js/restangular.js'></script>
+    <script type='text/javascript' src='js/firebase.js'></script>
+    <script type='text/javascript' src='js/angularfire.js'></script>
 <script type='text/javascript' src='js/battlescripts-app.js'></script>
 <script>
 var module={}; // To allow module.exports not to fail
@@ -58,7 +60,7 @@ bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam",
         <button ng-click="save()">Save</button>
         <button ng-click="delete()">Delete</button>
     </div>
-    <div>Name: <input ng-model="game.name"> (id: {{game.id}})</div>
+    <div>Name: <input ng-model="game.name"> (id: {{game.$id}})</div>
     <div>Max Players: <input type="number" min="2" ng-model="game.max_players"></div>
     <div>Source</div>
     <div>
