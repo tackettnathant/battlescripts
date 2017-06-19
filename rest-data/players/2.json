@@ -2,6 +2,6 @@
    "game_id": "1",
    "name": "Random",
    "description": "Make random moves",
-   "source": "// A stupid random-guessing player\nfunction () {\n  this.move = function (board) {\n    // Try 50 times to move\n    for (var i = 0; i < 50; i++) {\n      var m = Math.floor(Math.random() * 9);\n      if (board[m] == -1) {\n        return m;\n      }\n    }\n    return 0;\n  }\n}",
+   "source": "// A stupid random-guessing player\nfunction () {\n  this.move = function (board) {\n    // Try 50 times to move\n    for (var i = 0; i < 50; i++) {\n      var m = Math.floor(Math.random() * 9);\nconsole.log(m);\n      if (board[m] == -1) {\n        return m;\n      }\n    }\n    return 0;\n  }\n}",
    "id": 2
 }
