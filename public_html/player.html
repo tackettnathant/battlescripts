@@ -1,318 +1,145 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <title>Battle Scripts</title>
-  
-    <script type="text/javascript" src="js/jquery.js"></script>
-    <script type='text/javascript' src='js/angular.js'></script>
-    <script type='text/javascript' src='js/angular-resource.js'></script>
-    <script type='text/javascript' src='js/lodash.js'></script>
-    <script type='text/javascript' src='js/restangular.js'></script>
-    <script type='text/javascript' src='js/battlescripts-app.js'></script>
 
-    <script type="text/javascript" src="/lib/codemirror-3.20/lib/codemirror.js"></script>
-    <script type="text/javascript" src="/lib/codemirror-3.20/mode/javascript/javascript.js"></script>
-    <link rel="stylesheet" href="/lib/codemirror-3.20/lib/codemirror.css" />
-    <link rel="stylesheet" href="/lib/codemirror-3.20/theme/mdn-like.css" />
-
-    <script>
-    var module={}; // To allow module.exports not to fail
-    </script>
-    <script type='text/javascript' src='/lib/Match.js'></script>
-    <script>
-      bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", "$compile", "$rootScope", function($scope, $battlescripts, $queryparam, $compile, $rootScope) {
-        var id = $queryparam.get('id');
-        var game_id = $queryparam.get('game_id');
-        $scope.id=id;
-        $scope.game_id = game_id;
-        $scope.player = null;
-        $scope.game = null;
-        $scope.opponents = [];
-        $scope.opponent = null;
-
-        // Editor config
-        $scope.conf = {
-          mode: "javascript",
-          theme: "mdn-like",
-          indentUnit: 2,
-          smartIndent: true,
-          tabSize: 2,
-          indentWithTabs: false,
-          electricChars: true,
-          lineWrapping: false,
-          lineNumbers: true,
-          undoDepth: 10,
-          historyEventDelay: 200
-        };
-
-        // Load game
-        $battlescripts.get_game(game_id).then((game)=> {
-          $scope.game = game;
-          // Populate and compile the Game canvas
-          var canvas = angular.element('#canvas');
-          canvas.html($scope.game.canvas);
-          var $canvas_scope = canvas.scope();
-          $compile(canvas)($canvas_scope);
-        });
-
-        // Load player
-        if (!!id) {
-          $battlescripts.get_player(id).then(
-            player => $scope.player=player
-          );
-        }
-        else {
-          $scope.player = {
-            game_id:game_id
-          };
-        }
-        // Load opponents
-        $battlescripts.search_players({"game_id":game_id}).then( (players)=> {
-          $scope.opponents = players;
-        });
-
-        $scope.save = function() {
-          $battlescripts.save_player($scope.player).then(
-            updated_player => $scope.player=updated_player
-          );
-        };
-
-        $scope.delete = function() {
-          if (confirm("Are you sure?")) {
-            $battlescripts.delete_player($scope.player).then(()=>{
-              window.location.href="/";
-            });
-          }
-        };
-
-        $scope.debugger_paused=false;
-        $scope.debugger_pause = function(value) {
-          var ret = value;
-          $scope.$apply(() => {
-            if ($scope.debug) {
-              $scope.debugger_paused = true;
-              ret = new Promise((resolve) => {
-                document.getElementById('debugger_continue').onclick = function () {
-                  resolve(value);
-                };
-              });
-            }
-            else {
-              $scope.debugger_paused = false;
-            }
-          });
-          return ret;
-        };
-
-        $scope.test = function() {
-          // START THE MATCH!!!
-          var Game = eval($scope.game.source);
-          var game = new Game();
-          try {
-            var p1 = new $battlescripts.Player($scope.player.source, {
-              "before_move": function (data) {
-                // Hook into the debugger panel
-                $scope.debugger_data = JSON.stringify(data);
-                $scope.debugger_message = "Paused to view the game data the player is receiving";
-                $scope.debugger_move = null;
-                return $scope.debugger_pause(data);
-              },
-              "after_move": function (player_move) {
-                $scope.debugger_move = player_move;
-                $scope.debugger_message = "Paused to view the player's move response";
-                return $scope.debugger_pause(player_move);
-              }
-            });
-          }
-          catch(e) {
-            $scope.console.log("<span>[Compile Error]</span>"+e.toString(), "compile_error");
-            return;
-          }
-          var p2 = new $battlescripts.Player($scope.opponent.source);
-          var players = [ p1, p2 ];
-
-          var match = new Match(game, players,{
-            total_games: 1,
-            move_delay: 100,
-            time_limit: 9999,
-            render_history:true
-          });
-
-          match.subscribe("game.render", function(data) {
-            var $scope = angular.element('#canvas').scope();
-            if ($scope) {
-              $scope.$apply(function() {
-                $scope.game = data;
-              });
-            }
-            else {
-              console.log("$scope not found");
-            }
-
-          });
-          match.subscribe("match.results", function(results) {
-            var $scope = angular.element('#canvas').scope();
-            if ($scope) {
-              $scope.$apply(function() {
-                $scope.results = results;
-              });
-            }
-            else {
-              console.log("$scope not found");
-            }
-          });
-
-          match.start({});
-        };
-
-        // CONSOLE
-        // -------
-        $scope.console = {
-          log:function(msg,className) {
-            var $console = $('#console');
-            $console.append(`<div class="entry ${className}">${msg}</div>`);
-            $console.prop('scrollTop',9999);
-          }
-        };
-        $rootScope.$on('log/player',function(data,msg) {
-          $scope.console.log("<span>[player]</span>"+msg,"log_player");
-        });
-        $rootScope.$on('error/player',function(data,msg) {
-          $scope.console.log("<span>[player error]</span>"+msg,"log_player_error");
-        })
-      }]);
-
-      bsapp.controller("CanvasController", ["$scope", "$battlescripts", "$queryparam", "$compile", function($scope, $battlescripts, $queryparam, $compile) {
-        $scope.game={};
-      }]);
-
-    </script>
-    <style>
-    /* FLEXBOX Layout stolen from the web */
-
-    html, body, .viewport {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-    }
-
-    .panel {
-        border: 1px solid black;
-        padding: 0.25em;
-        margin: 0.25em;
-        border-radius: 0.25em;
-        overflow:auto;
-    }
-
-    /* items flex/expand vertically */
-    .vbox {
-        display: -webkit-flex;
-        display:    -moz-flex;
-        display:     -ms-flex;
-        display:         flex;
-        -webkit-flex-direction: column;
-        -moz-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-    }
-    /* items flex/expand horizontally */
-    .hbox {
-        display: -webkit-flex;
-        display:    -moz-flex;
-        display:     -ms-flex;
-        display:         flex;
-        -webkit-flex-direction: row;
-        -moz-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-    }
-    .space-between {
-        -webkit-justify-content: space-between;
-        -moz-justify-content: space-between;
-        -ms-justify-content: space-between;
-        justify-content: space-between;
-    }
-
-    /* I went with a fixed height header & footer because it's a common case.
-      This could easily be altered to flex proportionally with the page.
-    */
-    .header {
-        height: 100px;
-    }
-    .footer {
-        height:200px;
-    }
-
-    .main {
-        -webkit-flex: 1;
-        -moz-flex: 1;
-        -ms-flex: 1;
-        flex: 1;
-    }
-    .source, .test, .debugger {
-        -webkit-flex: 4;
-        -moz-flex: 4;
-        -ms-flex: 4;
-        flex: 4;
-    }
-    .left {
-        -webkit-flex: 1.5;
-        -moz-flex: 1.5;
-        -ms-flex: 1.5;
-        flex: 1.5;
-    }
-    </style>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type='text/javascript' src='js/angular.js'></script>
+<script type='text/javascript' src='js/angular-resource.js'></script>
+<script type='text/javascript' src='js/lodash.js'></script>
+<script type='text/javascript' src='js/restangular.js'></script>
+<script type='text/javascript' src='js/firebase.js'></script>
+<script type='text/javascript' src='js/angularfire.js'></script>
+<script type='text/javascript' src='js/battlescripts-app.js'></script>
+<script>
+var module={}; // To allow module.exports not to fail
+</script>
+<script type='text/javascript' src='/lib/Match.js'></script>
 </head>
+<body ng-app="battlescripts" ng-controller="ScreenController">
 
-<body class="vbox" ng-app="battlescripts" ng-controller="ScreenController">
-<div class="panel header">
-    <h1>Player Editor : {{game.name}}</h1>
-    <a href="/">Home</a>
-</div>
-<div class="main hbox space-between">
-    <div class="panel left">
-        <div>Name: <input ng-model="player.name"> (id: {{player.id}})</div>
-        <div>Description: <input ng-model="player.description"></div>
-        <div>
-            <button ng-click="save()">Save</button>
-            <button ng-click="delete()">Delete</button>
-        </div>
-    </div>
-    <div class="panel source">
-        <h2>Source Editor</h2>
-        <div>
-            <textarea codemirror="conf" style="width:90%;height:300px;" ng-model="player.source"></textarea>
-        </div>
-    </div>
-    <div class="panel test">
-        <h2>Tester</h2>
-        <div>Test Opponent: <select ng-options="p as p.name for p in opponents track by p.id" ng-model="opponent"></select></div>
+<h1>Player Editor : {{game.name}}</h1>
 
-        <div>
-            <button ng-click="test()">Play A Test Game</button>
-        </div>
-        <div id="canvas" ng-controller="CanvasController" style=""></div>
+<a href="/">Home</a>
+
+<script>
+  bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", "$compile", "$timeout","$firebaseArray", "$firebaseAuth", function($scope, $battlescripts, $queryparam, $compile, $timeout) {
+    var id = $queryparam.get('id');
+    var game_id = $queryparam.get('game_id');
+    $scope.id=id;
+    $scope.game_id = game_id;
+    $scope.player = null;
+    $scope.game = null;
+    $scope.opponents = [];
+    $scope.opponent = null;
+
+    // Load game
+    $battlescripts.get_game(game_id).then((game)=> {
+      $scope.game = game;
+      // Populate and compile the Game canvas
+        var canvas = angular.element('#canvas');
+        canvas.html($scope.game.canvas);
+        var $canvas_scope = canvas.scope();
+        $compile(canvas)($canvas_scope);
+    });
+
+    // Load player
+    if (!!id) {
+      $battlescripts.get_player(id).then(
+        player => $scope.player=player
+      );
+    }
+    else {
+      $scope.player = {
+        game_id:game_id
+      };
+    }
+    // Load opponents
+    $battlescripts.search_players({"game_id":game_id}).then( (players)=> {
+      $scope.opponents = players;
+    });
+
+    $scope.save = function() {
+      $battlescripts.save_player($scope.player).then(
+        updated_player => $scope.player=updated_player
+      );
+    };
+
+    $scope.delete = function() {
+      if (confirm("Are you sure?")) {
+        $battlescripts.delete_player($scope.player).then(()=>{
+          window.location.href="/";
+        });
+      }
+    };
+
+    $scope.test = function() {
+        // START THE MATCH!!!
+      var Game = eval($scope.game.source);
+        var game = new Game();
+        var p1_code = $scope.player.source;
+        var p1 = eval("(" + p1_code + ")");
+        var p2_code = $scope.opponent.source;
+        var p2 = eval("(" + p2_code + ")");
+        var players = [ new p1(), new p2() ];
+
+        var match = new Match(game, players,{
+          total_games: 1,
+          move_delay: 100,
+          time_limit: 9999,
+          render_history:true
+        });
+
+        match.subscribe("game.render", function(data) {
+          var $scope = angular.element('#canvas').scope();
+          if ($scope) {
+            $scope.$apply(function() {
+              $scope.game = data;
+            });
+          }
+          else {
+            console.log("$scope not found");
+          }
+
+        });
+        match.subscribe("match.results", function(results) {
+          var $scope = angular.element('#canvas').scope();
+          if ($scope) {
+            $scope.$apply(function() {
+              $scope.results = results;
+            });
+          }
+          else {
+            console.log("$scope not found");
+          }
+        });
+
+        match.start({});
+      };
+  }]);
+
+  bsapp.controller("CanvasController", ["$scope", "$battlescripts", "$queryparam", "$compile", function($scope, $battlescripts, $queryparam, $compile) {
+    $scope.game={};
+  }]);
+
+</script>
+
+<div ng-show="id && !player">Loading...</div>
+<div ng-show="!id || player">
+    <div>
+        <button ng-click="save()">Save</button>
+        <button ng-click="delete()">Delete</button>
     </div>
-    <div class="panel debugger">
-        <h2>Debugger</h2>
-        <input type="checkbox" ng-model="debug"> Enable Debugging
-        <div ng-id="debug">
-            <div ng-show="debugger_paused">
-                {{debugger_message}}<br>
-                <button id="debugger_continue" ng-click="debugger_continue()">Continue</button>
-            </div>
-            <div>Game Data:</div>
-            <textarea id="debugger_data" ng-model="debugger_data" style="width:90%;height:200px;"></textarea>
-            <div>Player Move:</div>
-            <textarea id="debugger_move" ng-model="debugger_move" style="width:90%;height:100px;"></textarea>
-        </div>
+    <div>Name: <input ng-model="player.name"> (id: {{player.id}})</div>
+    <div>Description: <input ng-model="player.description"></div>
+    <div>Source</div>
+    <div>
+        <textarea style="width:800px;height:300px;" ng-model="player.source"></textarea>
     </div>
-</div>
-<div class="panel footer" id="console">
-    Console
+    <div>Test Opponent: <select ng-options="p as p.name for p in opponents track by p.id" ng-model="opponent"></select> <button ng-click="test()">Play A Test Game</button></div>
+    <div id="canvas" ng-controller="CanvasController" style=""></div>
 </div>
 
 </body>
 </html>
-
