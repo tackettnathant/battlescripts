@@ -1,4 +1,4 @@
-var bsapp = angular.module('battlescripts', ['restangular']);
+var bsapp = angular.module('battlescripts', ['restangular','firebase']);
 
 bsapp.directive('json', function() {
   return {
@@ -121,51 +121,78 @@ bsapp.config(function(RestangularProvider) {
 	RestangularProvider.setDefaultHeaders({'Content-Type': 'application/json'});
 });
 
-bsapp.factory('$battlescripts', function(Restangular,$rootScope) {
+bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$rootScope", function($firebaseArray,$firebaseObject,$rootScope) {
 	var api = {};
 
-	// GAME methods
+  //Initialize firebase
+  var config = {
+    apiKey: "AIzaSyAwQvAx4apZtW4fa3nLYeoy5wAEohQohj0",
+    authDomain: "battlescripts-eb59b.firebaseapp.com",
+    databaseURL: "https://battlescripts-eb59b.firebaseio.com",
+    projectId: "battlescripts-eb59b",
+    storageBucket: "battlescripts-eb59b.appspot.com",
+    messagingSenderId: "1029158174849"
+  };
+  firebase.initializeApp(config);
+  // GAME methods
   // ------------
-  var games = Restangular.all('games');
-  var players = Restangular.all('players');
 
-  api.get_all_games = ()=>games.getList().catch(()=>[]);
-  api.get_game = (id) => games.get(id).catch(()=>{});
-  api.search_games = (params) => games.getList(params).catch(()=>[]);
+
+  var gameRef=firebase.database().ref().child("games");
+  var playerRef=firebase.database().ref().child("players");
+
+
+  api.get_all_games = ()=>$firebaseArray(gameRef).$loaded().catch(()=>{});
+
+  api.get_game = (id) => $firebaseObject(gameRef.child(id)).$loaded().catch(()=>{});
+
+  api.search_games = function(params) {
+    var param=Object.keys(params)[0];
+    var val = params[param];
+    var query = gameRef.orderByChild(param).equalTo(val);
+    return $firebaseArray(query).$loaded();
+
+  }
   api.save_game = function( game ) {
-    if (game && game.id) {
-      // Update
-      return game.save();
+    if (game && game.$id) {
+      return game.$save().then(ref=>$firebaseObject(ref).$loaded());
     }
     else {
       // Create
-      return games.post( game );
+      return $firebaseArray(gameRef).$add(game).then(ref=>$firebaseObject(ref).$loaded());
     }
   };
   api.delete_game = function( game ) {
-    if (game && game.id) {
-      return game.remove();
+    if (game && game.$id) {
+      return game.$remove();
     }
   };
 
   // PLAYER methods
   // --------------
-  api.get_all_players = ()=>players.getList().catch(()=>[]);
-  api.get_player = (id) => players.get(id).catch(()=>{});
-  api.search_players = (params) => players.getList(params).catch(()=>[]);
+  api.get_all_players = ()=>$firebaseArray(playerRef).$loaded().catch(()=>[]);
+  api.get_player = (id) => $firebaseObject(playerRef.child(id)).$loaded().catch(()=>{});
+
+  api.search_players = function(params) {
+    var param=Object.keys(params)[0];
+    var val = params[param];
+    var query = playerRef.orderByChild(param).equalTo(val);
+    return $firebaseArray(query).$loaded();
+
+  }
   api.save_player = function( player ) {
-    if (player && player.id) {
+    if (player && player.$id) {
       // Update
-      return player.save();
+      return player.$save().then(ref=>$firebaseObject(ref).$loaded());
     }
     else {
       // Create
-      return players.post( player );
+      return $firebaseArray(playerRef).$add( player ).then(ref=>$firebaseObject(ref).$loaded());
     }
   };
   api.delete_player = function( player ) {
-    if (player && player.id) {
-      return player.remove();
+    if (player && player.$id) {
+      return player.$remove();
     }
   };
 
@@ -209,7 +236,7 @@ bsapp.factory('$battlescripts', function(Restangular,$rootScope) {
   // TODO: Wrapper function for Game debugging?
 
   return api;
-});
+}]);
 
 bsapp.factory('$queryparam', function() {
   return {

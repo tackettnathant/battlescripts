@@ -9,6 +9,8 @@
 <script type='text/javascript' src='js/angular-resource.js'></script>
 <script type='text/javascript' src='js/lodash.js'></script>
 <script type='text/javascript' src='js/restangular.js'></script>
+<script type='text/javascript' src='js/firebase.js'></script>
+<script type='text/javascript' src='js/angularfire.js'></script>
 <script type='text/javascript' src='js/battlescripts-app.js'></script>
 <script>
 var module={}; // To allow module.exports not to fail
@@ -22,22 +24,52 @@ var module={}; // To allow module.exports not to fail
 <h1>Battle Scripts</h1>
 
 <script>
-bsapp.controller("ScreenController", ["$scope", "$battlescripts", function($scope, $battlescripts) {
-  $scope.games = [];
-  $scope.players = {};
-  $battlescripts.get_all_games().then(
-    list => $scope.games = list
-  );
-  $battlescripts.get_all_players().then(
-    (players) => {
-      (players || []).forEach( player=>{
-        if (!$scope.players[player.game_id]) {
-          $scope.players[player.game_id]=[];
+bsapp.controller("ScreenController", ["$scope", "$battlescripts","$firebaseArray", "$firebaseAuth", function($scope, $battlescripts,$firebaseArray, $firebaseAuth) {
+    var auth = $firebaseAuth();
+    var ref;
+    $scope.games = [];
+    $scope.players = {};
+    // login with Facebook
+    firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    // User is signed in.
+                    $battlescripts.get_all_games().then(
+                            function(list){
+                                $scope.games = list;
+                                console.log(list);
+                            }
+                    );
+                    $battlescripts.get_all_players().then(
+                            (players) => {
+                    (players || []).forEach( player=>{
+                        if (!$scope.players[player.game_id]) {
+                        $scope.players[player.game_id]=[];
+                    }
+                    $scope.players[player.game_id].push(player);
+                })
+            }
+    )
+} else {
+    //Not signed in
+    auth.$signInWithPopup("google").then(function(firebaseUser) {
+        $battlescripts.get_all_games().then(
+                list => $scope.games = list
+        );
+        $battlescripts.get_all_players().then(
+                (players) => {
+        (players || []).forEach( player=>{
+            if (!$scope.players[player.game_id]) {
+            $scope.players[player.game_id]=[];
         }
         $scope.players[player.game_id].push(player);
-      })
-    }
-  )
+    })
+}
+)
+}).catch(function(error) {
+    console.log("Authentication failed:", error);
+});
+}
+});
 }]);
 </script>
 
@@ -49,10 +81,10 @@ bsapp.controller("ScreenController", ["$scope", "$battlescripts", function($scop
 
 <ul>
     <li ng-repeat="game in games">
-        <a href="game.html?id={{game.id}}">{{game.name}}</a>
+        <a href="game.html?id={{game.$id}}">{{game.name}}</a>
         <ul>
-            <li ng-repeat="player in players[game.id]"><a href="player.html?game_id={{game.id}}&id={{player.id}}">{{player.name}}</a></li>
-            <li><a href="player.html?game_id={{game.id}}">+ Create New Player</a>
+            <li ng-repeat="player in players[game.$id]"><a href="player.html?game_id={{game.$id}}&id={{player.$id}}">{{player.name}}</a></li>
+            <li><a href="player.html?game_id={{game.$id}}">+ Create New Player</a>
         </ul>
     </li>
 </ul>

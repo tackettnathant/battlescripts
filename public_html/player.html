@@ -9,6 +9,8 @@
     <script type='text/javascript' src='js/angular-resource.js'></script>
     <script type='text/javascript' src='js/lodash.js'></script>
     <script type='text/javascript' src='js/restangular.js'></script>
+    <script type='text/javascript' src='js/firebase.js'></script>
+    <script type='text/javascript' src='js/angularfire.js'></script>
     <script type='text/javascript' src='js/battlescripts-app.js'></script>
 
     <script type="text/javascript" src="/lib/codemirror-3.20/lib/codemirror.js"></script>
@@ -287,7 +289,7 @@
     </div>
     <div class="panel test">
         <h2>Tester</h2>
-        <div>Test Opponent: <select ng-options="p as p.name for p in opponents track by p.id" ng-model="opponent"></select></div>
+        <div>Test Opponent: <select ng-options="p as p.name for p in opponents track by p.$id" ng-model="opponent"></select></div>
 
         <div>
             <button ng-click="test()">Play A Test Game</button>

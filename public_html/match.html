@@ -9,6 +9,8 @@
 <script type='text/javascript' src='js/angular-resource.js'></script>
 <script type='text/javascript' src='js/lodash.js'></script>
 <script type='text/javascript' src='js/restangular.js'></script>
+<script type='text/javascript' src='js/firebase.js'></script>
+<script type='text/javascript' src='js/angularfire.js'></script>
 <script type='text/javascript' src='js/battlescripts-app.js'></script>
 <script>
 var module={}; // To allow module.exports not to fail
@@ -53,7 +55,7 @@ var module={}; // To allow module.exports not to fail
         $scope.players = new Array($scope.game.max_players).fill(null);
 
         // Retrieve a list of available players for this game
-        $battlescripts.search_players({"game_id":$scope.game.id}).then(
+        $battlescripts.search_players({"game_id":$scope.game.$id}).then(
           players=>$scope.player_list=players
         )
       }
@@ -100,12 +102,12 @@ var module={}; // To allow module.exports not to fail
 <div style="float:left;width:200px;min-height:600px;">
     <h3>Game Options</h3>
     <div style="margin:10px;">
-        Game: <select ng-options="g as g.name for g in games track by g.id" ng-model="game"></select>
+        Game: <select ng-options="g as g.name for g in games track by g.$id" ng-model="game"></select>
     </div>
     <div style="margin:10px;">
         <div>Players:</div>
         <div ng-repeat="p in players track by $index">
-            <select ng-options="p as p.name for p in player_list track by p.id" ng-model="players[$index]"></select>
+            <select ng-options="p as p.name for p in player_list track by p.$id" ng-model="players[$index]"></select>
         </div>
     </div>
     <div style="margin:10px;">
