@@ -121,7 +121,7 @@ bsapp.config(function(RestangularProvider) {
 	RestangularProvider.setDefaultHeaders({'Content-Type': 'application/json'});
 });
 
-bsapp.factory('$battlescripts', function(Restangular) {
+bsapp.factory('$battlescripts', function(Restangular,$rootScope) {
 	var api = {};
 
 	// GAME methods
@@ -174,7 +174,17 @@ bsapp.factory('$battlescripts', function(Restangular) {
 
   // A wrapper to create a Player object from code and enable debugging, etc.
   api.Player = function(code,debug_functions) {
-    var p = eval("("+code+")");
+    // Wrap the player code to provide functionality in the web context
+    var p = eval(`
+      (()=>{
+        var console={
+          log:function(m){
+            $rootScope.$broadcast("log/player",m);
+          }
+        };
+        return (${code});
+      })();
+    `);
     debug_functions = debug_functions || {};
     this.player = new p();
     this.move = function(data) {
@@ -189,7 +199,10 @@ bsapp.factory('$battlescripts', function(Restangular) {
         });
     };
     this.error = function(err) {
-      return this.player.error(err);
+      $rootScope.$broadcast("error/player",err);
+      if (typeof this.player.error==="function") {
+        return this.player.error(err);
+      }
     };
   };
 

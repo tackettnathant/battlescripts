@@ -21,7 +21,7 @@
     </script>
     <script type='text/javascript' src='/lib/Match.js'></script>
     <script>
-      bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", "$compile", "$timeout", function($scope, $battlescripts, $queryparam, $compile, $timeout) {
+      bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", "$compile", "$rootScope", function($scope, $battlescripts, $queryparam, $compile, $rootScope) {
         var id = $queryparam.get('id');
         var game_id = $queryparam.get('game_id');
         $scope.id=id;
@@ -109,20 +109,26 @@
           // START THE MATCH!!!
           var Game = eval($scope.game.source);
           var game = new Game();
-          var p1 = new $battlescripts.Player($scope.player.source, {
-            "before_move":function(data) {
-              // Hook into the debugger panel
-              $scope.debugger_data = JSON.stringify(data);
-              $scope.debugger_message = "Paused to view the game data the player is receiving";
-              $scope.debugger_move = null;
-              return $scope.debugger_pause(data);
-            },
-            "after_move":function(player_move) {
-              $scope.debugger_move = player_move;
-              $scope.debugger_message = "Paused to view the player's move response";
-              return $scope.debugger_pause(player_move);
-            }
-          });
+          try {
+            var p1 = new $battlescripts.Player($scope.player.source, {
+              "before_move": function (data) {
+                // Hook into the debugger panel
+                $scope.debugger_data = JSON.stringify(data);
+                $scope.debugger_message = "Paused to view the game data the player is receiving";
+                $scope.debugger_move = null;
+                return $scope.debugger_pause(data);
+              },
+              "after_move": function (player_move) {
+                $scope.debugger_move = player_move;
+                $scope.debugger_message = "Paused to view the player's move response";
+                return $scope.debugger_pause(player_move);
+              }
+            });
+          }
+          catch(e) {
+            $scope.console.log("<span>[Compile Error]</span>"+e.toString(), "compile_error");
+            return;
+          }
           var p2 = new $battlescripts.Player($scope.opponent.source);
           var players = [ p1, p2 ];
 
@@ -159,6 +165,22 @@
 
           match.start({});
         };
+
+        // CONSOLE
+        // -------
+        $scope.console = {
+          log:function(msg,className) {
+            var $console = $('#console');
+            $console.append(`<div class="entry ${className}">${msg}</div>`);
+            $console.prop('scrollTop',9999);
+          }
+        };
+        $rootScope.$on('log/player',function(data,msg) {
+          $scope.console.log("<span>[player]</span>"+msg,"log_player");
+        });
+        $rootScope.$on('error/player',function(data,msg) {
+          $scope.console.log("<span>[player error]</span>"+msg,"log_player_error");
+        })
       }]);
 
       bsapp.controller("CanvasController", ["$scope", "$battlescripts", "$queryparam", "$compile", function($scope, $battlescripts, $queryparam, $compile) {
@@ -287,9 +309,8 @@
         </div>
     </div>
 </div>
-<div class="panel footer">
+<div class="panel footer" id="console">
     Console
-    <div id="console"></div>
 </div>
 
 </body>
