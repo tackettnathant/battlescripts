@@ -235,6 +235,19 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$rootScope
 
   // TODO: Wrapper function for Game debugging?
 
+  // Render to a Canvas
+  api.render = function(canvas_selector, data) {
+    var $scope = angular.element(canvas_selector).scope();
+    if ($scope) {
+      $scope.$apply(function() {
+        $scope.game = data;
+      });
+    }
+    else {
+      console.log("$scope not found in $battlescripts.render()");
+    }
+  };
+
   return api;
 }]);
 

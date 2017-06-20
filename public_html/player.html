@@ -3,7 +3,8 @@
 <head>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
   <title>Battle Scripts</title>
-  
+    <script>var module={}; // To allow module.exports not to fail</script>
+
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type='text/javascript' src='js/angular.js'></script>
     <script type='text/javascript' src='js/angular-resource.js'></script>
@@ -19,9 +20,6 @@
     <link rel="stylesheet" href="/lib/codemirror-3.20/lib/codemirror.css" />
     <link rel="stylesheet" href="/lib/codemirror-3.20/theme/mdn-like.css" />
 
-    <script>
-    var module={}; // To allow module.exports not to fail
-    </script>
     <script>
       bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", "$compile", "$rootScope", function($scope, $battlescripts, $queryparam, $compile, $rootScope) {
         var id = $queryparam.get('id');
@@ -142,29 +140,8 @@
           });
 
           match.subscribe("game.render", function(data) {
-            var $scope = angular.element('#canvas').scope();
-            if ($scope) {
-              $scope.$apply(function() {
-                $scope.game = data;
-              });
-            }
-            else {
-              console.log("$scope not found");
-            }
-
+            $battlescripts.render('#canvas',data);
           });
-          match.subscribe("match.results", function(results) {
-            var $scope = angular.element('#canvas').scope();
-            if ($scope) {
-              $scope.$apply(function() {
-                $scope.results = results;
-              });
-            }
-            else {
-              console.log("$scope not found");
-            }
-          });
-
           match.start({});
         };
 

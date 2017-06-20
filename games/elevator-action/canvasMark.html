@@ -1,0 +1,48 @@
+<style type='text/css'>
+/* Game CSS */
+div{border:0;margin:0;padding:0}div.game{font-family:"Courier New", Courier, monospace}div.player{width:220px;float:left}div.game div.building div{position:relative}div.game div.building div.roof{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAA0CAMAAAD/lFnbAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA9QTFRF3t7eIWhoR0dHuLi4////42RcUQAAAAV0Uk5T/////wD7tg5TAAAA6klEQVR42uzUWwoDIRBE0Yo9+19zyOTlPGIE+4IJVX/+yOUgamEXnzZ4r9Dq0tjE3dHctN0q7c3aHcGBu/t/updf7V6ky3sRm4O73e1ud7vb3e52t7vd7W53u9vd7p6ze5dq77PuyFu7u3td3SVx7e7+ezq6I+bzPhEXqJ3nfRQXqJ3ofRAXqJ3pvRcXqJ3qvRMXqJ3rvRUXqJ3svREXqJ3tXYsL1E73rsQFaud7v8UFagPeL3GB2oT3U1ygNuL9EBeozXjfxQVqQ96ruMC3ve68WyPeN3FxX8nX7hFxsdp1eNWtQe9SrgIMABT/dcPU/L5XAAAAAElFTkSuQmCC);width:183px;height:52px}div.game div.building div.floor{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAAwCAMAAABkBRvNAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABhQTFRFR0dH////3t7eIWhouLi4ISHe/wAAIbi4K+d39gAAANpJREFUeNrs2dEKwyAMBdCYZvP//3idjK0WM5OmSin3vjUPl4MY+iDJ6CyNxFsJbritbmaW3Exa8/0g8s1zZl6UMFtrnlWK9b7uKpti07zvttSE3UTtZm3udGs1QTd9Yp073XpN1M0lZJ173WpN+J68ez1z5z3RauJ76Y9rL5XAPdddB+6LuR+79OYnuXv1cMMNN9xww/3n7yaaWwTnfQ93UtxpojvBfXk39hJuuOGGG2644Yb7kHviq2vo5bV2C4+KdtxHI1v3OPbp7tX6e59nngsPFRbxS4ABALPjsQMDmlgRAAAAAElFTkSuQmCC);width:183px;height:48px}div.game div.building div.basement{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAAwCAMAAABkBRvNAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABVQTFRF/96X////3t7eVVpb/wAAIWhouLi4OrbmdQAAAUtJREFUeNrsmIEOwiAMRIFW/v+THaWyOR1DLdqantEKS+rLpTvFkGfr8kSfdw3O7dyj3CklXoJsTelyIP7EgT54pxtr464+gGztcY/2OeOmB8jWrt+DfdxvRX6DTb+lc+RLeQKz1OMe7dHhzgb9njLXkvO9q417Ro5I5smuut/u9yt+q8+TXb1xw0xJ5Pe9zPvtefJHefL8dLlecb89vz2/Pb/V5PfuPL85X1jKkwIcSIiGvi8Xl4GdbtWA31i5eU1vLOR3wSbetraR34jbAmXG0UB+I/vLftebs0aL6vzGnvTmCZ5Ia55gneZAz8C1TDm9xKg3v5Fvx5U9VGza1JvfCDnSP7TNb+Ium8StNL+XMYkxPsw5b6r+/c1+D2z+PL+3qtdHNk916nd+o2XlTo8io4Y2B3SE/a7yMbeopLkX8K9wJ2FsHrCrAAMAyMajS2MwX5kAAAAASUVORK5CYII=);width:183px;height:48px}div.game div.building div.foundation{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALcAAAAkCAMAAAD8QltAAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAlQTFRFuLi4/wAAVVpbVAg9pQAAAFFJREFUeNrs1LENACAMA8GY/YemYAUKjO4b2shCNyN93OrM3va2t72v7d16d5KVU9Nbe3fxP0nh5rV384QnPOEJT3jCE57whCc84QlPnmoLMABbLB9vig2OCgAAAABJRU5ErkJggg==);width:183px;height:36px}div.game div.building div.floor div.floor-number{position:absolute;height:9px;width:14px;right:8px;top:5px;color:#FFF;font-size:8px;text-align:center}div.game div.building div.floor div.elevator{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAwCAMAAAA4o5qsAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAA9QTFRFISEh3t7euLi4/5e4////U2AtawAAAAV0Uk5T/////wD7tg5TAAAAN0lEQVR42mJgAQIGJgzAABSlgRQzDjAqNSo1KjUqhUsKS4ECLlRApQ0DIxbAwEJACpscUBwgwABhjw4XBcznBgAAAABJRU5ErkJggg==);position:absolute;width:26px;height:48px;left:93px;top:0}div.game div.building div.floor div.elevator div.dude{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAwCAMAAAA4o5qsAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF3t7e/96XR0dH////EtF17wAAAAR0Uk5T////AEAqqfQAAABZSURBVHja7NJRCsAgDAPQJr3/nacDQWcjysQvg3+PlrZoLmOXLv0jMj9BXCaWRFUAiLjhS1CUE+5Vw2fCAdVD9HstE7dTOoarKkne9pslP0vqvDb9ex8BBgAsFg4docXAOQAAAABJRU5ErkJggg==);width:26px;height:48px}div.game div.building div.floor div.elevator div.dude div.riding{position:absolute;width:26px;color:#474747;font-size:12px;font-weight:700;text-align:center;top:4px}div.game div.building div.floor div.elevator-top div.dude,div.game div.building div.floor div.elevator-bottom div.dude,div.game div.building div.floor div.elevator-above div.dude{display:none}div.game div.building div.floor div.elevator-open{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAwCAMAAAA4o5qsAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABJQTFRFISEh3t7eIbi4uLi4/5e4////ErcalAAAAAZ0Uk5T//////8As7+kvwAAADlJREFUeNpiYAUCBmYMwAAUpboUExMLDjAqNSo1KjUqhV0Ka4ECLlRApQ0DIxbAwEpACpscUBwgwAAczBG9DR9/7AAAAABJRU5ErkJggg==)}div.game div.building div.basement div.elevator-open{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAwCAMAAAA4o5qsAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABJQTFRFISEhVVpb3t7euLi4/5e4////99/jBQAAAAZ0Uk5T//////8As7+kvwAAAD5JREFUeNpiYAUCBmYMwAAUpboUMyMLDjAEpBiHsuNH/TXqr6HrL6wFCrhQAZU2DExYAAMrASlsckBxgAADABABEe1IEFq1AAAAAElFTkSuQmCC)}div.game div.building div.floor div.elevator-top{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAwCAMAAAA4o5qsAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRFISEh3t7euLi4////awiMzwAAAAR0Uk5T////AEAqqfQAAAA3SURBVHjaYmBGBkxMSByGUalRqVGpUalBIMXAhBUwgHQxMMIAExOcycCMKoUEIFLY5IDiAAEGAPxXDalX9oY3AAAAAElFTkSuQmCC)}div.game div.building div.floor div.elevator-bottom{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAwCAMAAAA4o5qsAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAlQTFRFISEhuLi4////RKm9agAAAAN0Uk5T//8A18oNQQAAACNJREFUeNpiYAICBkYMwAAUpYkUdjAqNSo1KjUqNeBSAAEGAAnRCWmCYfH7AAAAAElFTkSuQmCC)}div.game div.building div.floor div.elevator-above{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAwCAMAAAA4o5qsAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAZQTFRFuLi4////qzErZQAAAAJ0Uk5T/wDltzBKAAAAHElEQVR42mJgRAYMDMicUalRqVGpUamRJAUQYABqFQSBS7jZmAAAAABJRU5ErkJggg==)}div.game div.building div.floor div.dudes{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADYAAAAZCAMAAABNYS0MAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAlQTFRF/96XR0dH////DScxDAAAAAN0Uk5T//8A18oNQQAAAG9JREFUeNrUk9EKQCEIQ3X//9G1dO/OhwtXgg6DZbgKIJMLFgQpJY1ha8tV3W4Rwc0C2QIWlI1lQZ/wLmAAJynJgBdAneNA5wZlMoS1bfNIvrfd3NGzHQO7STKgJqlMxrC3QZIBP7LZM+n/4NYRYABQYgeHT1tBjgAAAABJRU5ErkJggg==);position:absolute;width:54px;height:25px;right:92px;top:22px}div.game div.building div.floor div.dudes.dudes1{width:9px}div.game div.building div.floor div.dudes.dudes2{width:18px}div.game div.building div.floor div.dudes.dudes3{width:27px}div.game div.building div.floor div.dudes.dudes4{width:36px}div.game div.building div.floor div.dudes.dudes5{width:45px}div.game div.building div.floor div.dudes.dudes6{width:54px}div.game div.building div.floor div.dudes.dudes-sign{background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAAAZCAMAAAC/3XipAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAxQTFRF/96X3v//R0dH////6+U4uAAAAAR0Uk5T////AEAqqfQAAACzSURBVHjazJQBDsMgCEX/4P53XlFgU4HaxCwjTXzB9kX7jWAmkmcpb98DhCiWkL15B2ckZBUodutaCQAZ5rqaaG2fT8EkiwWjBBV0CTBbvpqOKagv2o53nTKQdHJJj8DmU2gRS+M1Vfu1miMssQTsnACjAxgOA5fgknklzyT68rodndg4uf8midNRiSZdwIaE7JMUejqphD9DAacknEv8oqzhrITDq/rnEoodtAngA/UWYABAog65jvl+NgAAAABJRU5ErkJggg==);width:68px;right:92px}div.game div.building div.floor div.dudes.dudes-sign div.sign{position:absolute;width:16px;height:12px;left:8px;top:7px;color:#474747;font-size:12px;font-weight:700;text-align:center}
+</style>
+
+<h2>Elevator Action</h2>
+<div ng-show="results.total_games>0" style="padding-bottom:100px;">
+    Game #{{results.games_played}} of {{results.total_games}}<br>
+    Player Wins: {{results.player_wins}}<br>
+    Draws: {{results.draws}}<br>
+
+<br>
+
+<div class="game">
+
+
+<div class="player" ng-repeat="player in game.players">
+Player #{{$index}}
+	<div class="building">
+
+		<div class="roof"></div>
+
+            <div class="floor" ng-class="{basement:floor.number==1}" ng-repeat="floor in player.floors">
+
+                <div class="floor-number">{{floor.number}}</div>
+
+        		<div ng-show="floor.waiting > 0" class="dudes" ng-class="{dudes1:floor.waiting==1,dudes2:floor.waiting==2,dudes3:floor.waiting==3,dudes4:floor.waiting==4,dudes5:floor.waiting==5,dudes6:floor.waiting==6,'dudes-sign':floor.waiting>6}">
+        		    
+        		    <div ng-show="floor.waiting > 6" class="sign">{{floor.waiting}}</div>
+        		    
+        		</div>
+
+	            <div ng-repeat="elevator in floor.elevators" ng-hide="floor.number < player.elevator_floor-1" class="elevator" ng-class="{'elevator-open':elevator.open,'elevator-top':floor.number==player.elevator_floor+1,'elevator-above':floor.number > player.elevator_floor+1,'elevator-bottom':floor.number==player.elevator_floor-1}">
+
+                    <div class="dude" ng-hide="elevator.carrying==0">
+                        <div class="riding" ng-hide="elevator.carrying<=1">{{elevator.carrying }}</div>    
+                    </div>
+
+              </div>
+
+        </div>
+
+		<div class="foundation"></div>    
+		
+	</div>
+</div>
+
+<div style="clear : both;">&nbsp</div>

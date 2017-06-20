@@ -1,0 +1,36 @@
+<style type='text/css'>
+/* Game CSS */
+.player { float:left; margin-right:10px; }
+.player td {
+    text-align:center;
+    padding:2px;
+}
+.elevator { background-color:#08084d; color:white; }
+</style>
+<div ng-show="results.total_games>0" style="padding-bottom:100px;">
+    Game #{{results.games_played}} of {{results.total_games}} / Move #{{game.move_number}} <br>
+    Player Wins: {{results.player_wins}} Draws: {{results.draws}}<br>
+
+    <div class="player" ng-repeat="player in game.players">
+        Player #{{$index}}
+        <br>
+        <table border="1">
+            <tr>
+                <th>Floor #</th>
+                <th># People</th>
+                <th>Elevator</th>
+            </tr>
+            <tr ng-repeat="floor in player.floors">
+                <td>{{floor.number}}</td>
+                <td>{{floor.waiting}}</td>
+                <td ng-repeat="elevator in floor.elevators">
+                    <div ng-show="elevator" class="elevator">
+                        {{elevator.carrying }} {{elevator.open?"OPEN":""}}
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
