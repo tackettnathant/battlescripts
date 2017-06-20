@@ -23,14 +23,13 @@
     var ref;
     $scope.games = [];
     $scope.players = {};
-    // login with Facebook
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
+//    // login with Facebook
+//    firebase.auth().onAuthStateChanged(function (user) {
+//      if (user) {
         // User is signed in.
         $battlescripts.get_all_games().then(
           function (list) {
             $scope.games = list;
-            console.log(list);
           }
         );
         $battlescripts.get_all_players().then(
@@ -42,7 +41,8 @@
               $scope.players[player.game_id].push(player);
             })
           }
-        )
+        );
+/*
       } else {
         //Not signed in
         auth.$signInWithPopup("google").then(function (firebaseUser) {
@@ -64,6 +64,7 @@
         });
       }
     });
+ */
   }]);
 </script>
 

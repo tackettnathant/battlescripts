@@ -127,12 +127,20 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
 
   //Initialize firebase
   var config = {
+    apiKey: "AIzaSyDvWaytF9BXDJ0ra9hwqwPKnCM0LSWPAbM",
+    authDomain: "battlescripts-161a3.firebaseapp.com",
+    databaseURL: "https://battlescripts-161a3.firebaseio.com",
+    projectId: "battlescripts-161a3",
+    storageBucket: "battlescripts-161a3.appspot.com",
+    messagingSenderId: "877337823986"
+    /*
     apiKey: "AIzaSyAwQvAx4apZtW4fa3nLYeoy5wAEohQohj0",
     authDomain: "battlescripts-eb59b.firebaseapp.com",
     databaseURL: "https://battlescripts-eb59b.firebaseio.com",
     projectId: "battlescripts-eb59b",
     storageBucket: "battlescripts-eb59b.appspot.com",
     messagingSenderId: "1029158174849"
+    */
   };
   firebase.initializeApp(config);
   var gameRef=firebase.database().ref().child("games");
@@ -144,9 +152,11 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
   api.login = function() {
     return new Promise((resolve,reject)=>{
       if (api.user) { resolve(api.user); }
-      return firebase.auth().signInWithPopup("google").then((userCredential)=>{
+      return $firebaseAuth().$signInWithPopup("google").then((userCredential)=>{
         api.user = userCredential.user;
         resolve(api.user);
+      }).catch((err)=>{
+        reject(err);
       });
     });
   };
@@ -182,6 +192,12 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
   // PLAYER methods
   // --------------
   api.get_all_players = ()=>$firebaseArray(playerRef).$loaded().catch(()=>[]);
+
+  api.get_my_players = (game_id)=>{
+    // game_id is optional, if missing then get all players for all games
+
+  };
+
   api.get_player = (id) => $firebaseObject(playerRef.child(id)).$loaded().catch(()=>{});
 
   api.search_players = function(params) {
