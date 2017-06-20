@@ -7,11 +7,9 @@
 
     <script type="text/javascript" src="js/jquery.js"></script>
 <script type='text/javascript' src='js/angular.js'></script>
-<script type='text/javascript' src='js/angular-resource.js'></script>
-<script type='text/javascript' src='js/lodash.js'></script>
-<script type='text/javascript' src='js/restangular.js'></script>
 <script type='text/javascript' src='js/firebase.js'></script>
 <script type='text/javascript' src='js/angularfire.js'></script>
+<script type='text/javascript' src='js/angular-sanitize.js'></script>
 <script type='text/javascript' src='js/battlescripts-app.js'></script>
 <script type='text/javascript' src='js/Match.js'></script>
 </head>
@@ -65,6 +63,10 @@ bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam",
     <div>Canvas</div>
     <div>
         <textarea style="width:800px;height:300px;" ng-model="game.canvas"></textarea>
+    </div>
+    <div>Documentation (Markdown)</div>
+    <div>
+        <textarea style="width:800px;height:300px;" ng-model="game.documentation"></textarea>
     </div>
 </div>
 

@@ -1,4 +1,11 @@
-var bsapp = angular.module('battlescripts', ['restangular','firebase']);
+var bsapp = angular.module('battlescripts', ['firebase','ngSanitize']);
+
+// Convert markdown to HTML
+bsapp.filter('markdown', function() {
+  return function(md) {
+    return (typeof micromarkdown!="undefined") ? micromarkdown.parse(md) : md;
+  };
+});
 
 bsapp.directive('json', function() {
   return {
@@ -115,13 +122,7 @@ bsapp.directive("codemirror", function($timeout) {
   };
 });
 
-// Web Services
-bsapp.config(function(RestangularProvider) {
-  RestangularProvider.setBaseUrl('/api');
-	RestangularProvider.setDefaultHeaders({'Content-Type': 'application/json'});
-});
-
-bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$rootScope", function($firebaseArray,$firebaseObject,$rootScope) {
+bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseAuth","$rootScope", function($firebaseArray,$firebaseObject,$firebaseAuth,$rootScope) {
 	var api = {};
 
   //Initialize firebase
@@ -134,14 +135,24 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$rootScope
     messagingSenderId: "1029158174849"
   };
   firebase.initializeApp(config);
-  // GAME methods
-  // ------------
-
-
   var gameRef=firebase.database().ref().child("games");
   var playerRef=firebase.database().ref().child("players");
 
+  // AUTH
+  // ----
+  api.user = firebase.auth().currentUser;
+  api.login = function() {
+    return new Promise((resolve,reject)=>{
+      if (api.user) { resolve(api.user); }
+      return firebase.auth().signInWithPopup("google").then((userCredential)=>{
+        api.user = userCredential.user;
+        resolve(api.user);
+      });
+    });
+  };
 
+  // GAME methods
+  // ------------
   api.get_all_games = ()=>$firebaseArray(gameRef).$loaded().catch(()=>{});
 
   api.get_game = (id) => $firebaseObject(gameRef.child(id)).$loaded().catch(()=>{});

@@ -7,11 +7,9 @@
 
     <script type="text/javascript" src="js/jquery.js"></script>
     <script type='text/javascript' src='js/angular.js'></script>
-    <script type='text/javascript' src='js/angular-resource.js'></script>
-    <script type='text/javascript' src='js/lodash.js'></script>
-    <script type='text/javascript' src='js/restangular.js'></script>
     <script type='text/javascript' src='js/firebase.js'></script>
     <script type='text/javascript' src='js/angularfire.js'></script>
+    <script type='text/javascript' src='js/angular-sanitize.js'></script>
     <script type='text/javascript' src='js/battlescripts-app.js'></script>
     <script type='text/javascript' src='js/Match.js'></script>
 
@@ -19,6 +17,7 @@
     <script type="text/javascript" src="/lib/codemirror-3.20/mode/javascript/javascript.js"></script>
     <link rel="stylesheet" href="/lib/codemirror-3.20/lib/codemirror.css" />
     <link rel="stylesheet" href="/lib/codemirror-3.20/theme/mdn-like.css" />
+    <script type='text/javascript' src='js/micromarkdown.js'></script>
 
     <script>
       bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", "$compile", "$rootScope", function($scope, $battlescripts, $queryparam, $compile, $rootScope) {
@@ -73,9 +72,12 @@
         });
 
         $scope.save = function() {
-          $battlescripts.save_player($scope.player).then(
-            updated_player => $scope.player=updated_player
-          );
+          $battlescripts.login().then((user)=>{
+alert(user);
+            $battlescripts.save_player($scope.player).then(
+              updated_player => $scope.player=updated_player
+            );
+          });
         };
 
         $scope.delete = function() {
@@ -220,7 +222,7 @@
         height: 100px;
     }
     .footer {
-        height:200px;
+        height:150px;
     }
 
     .main {
@@ -229,7 +231,7 @@
         -ms-flex: 1;
         flex: 1;
     }
-    .source, .test, .debugger {
+    .main > * {
         -webkit-flex: 4;
         -moz-flex: 4;
         -ms-flex: 4;
@@ -286,6 +288,10 @@
             <div>Player Move:</div>
             <textarea id="debugger_move" ng-model="debugger_move" style="width:90%;height:100px;"></textarea>
         </div>
+    </div>
+    <div class="panel documentation">
+        <h2>Game Documentation</h2>
+        <div ng-bind-html="game.documentation | markdown"></div>
     </div>
 </div>
 <div class="panel footer" id="console">
