@@ -73,6 +73,14 @@
 <h3>Try It!</h3>
 
 <div>
+    You are X (player 0). Your move() function will be passed a data structure like this:<br>
+    <code>{ player_number:0, board:[-1,-1,-1,-1,-1,-1,-1,-1,-1] }</code><br>
+    The data structure represents each square on the board, from top left [0] to bottom right [8]. The value is either a -1 if the space is empty, or the player number if it's taken.<br>
+    Your player is a constructor that returns an object with a move() method. This method must return the square number of your move [0-8].<br>
+    Tic-Tac-Toe is a solvable game. If you code your player well, you should never lose!
+</div>
+
+<div>
     <div style="height:320px;width:500px;float:left;">
         <textarea style="width:90%;height:90%;" id="player">
 // A stupid random-guessing player
