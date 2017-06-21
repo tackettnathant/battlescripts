@@ -53,11 +53,7 @@
         // Load game
         $battlescripts.get_game(game_id).then((game)=> {
           $scope.game = game;
-          // Populate and compile the Game canvas
-          var canvas = angular.element('#canvas');
-          canvas.html($scope.game.canvas);
-          var $canvas_scope = canvas.scope();
-          $compile(canvas)($canvas_scope);
+          $battlescripts.init_canvas(game.canvas);
         });
 
         // Load player
@@ -172,10 +168,6 @@
         $rootScope.$on('compile/success',function(data,msg) {
           $scope.console.log("<span>[player]</span> Compiled Successfully","success");
         });
-      }]);
-
-      bsapp.controller("CanvasController", ["$scope", "$battlescripts", "$queryparam", "$compile", function($scope, $battlescripts, $queryparam, $compile) {
-        $scope.game={};
       }]);
 
     </script>

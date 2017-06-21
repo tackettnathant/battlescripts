@@ -229,6 +229,29 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
   // UTIL methods
   // ------------
 
+  // A quick shortcut to play a game
+  api.play = function(Match, game_source, player_sources, options, error_handler) {
+    var Game = eval(game_source);
+    var game = new Game();
+    var players = [];
+    try {
+      player_sources.forEach((code) => {
+        players.push(new api.Player(code))
+      });
+    }
+    catch(e) {
+      error_handler(e);
+      return;
+    }
+    var match = new Match(game, players, options);
+    // Render
+    match.subscribe("game.render", api.render);
+    $rootScope.$on('error/player',function(data,msg) {
+      error_handler(msg);
+    });
+    match.start();
+  };
+
   // A wrapper to create a Player object from code and enable debugging, etc.
   api.Player = function(code,debug_functions) {
     // Wrap the player code to provide functionality in the web context
@@ -265,20 +288,31 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
 
   // TODO: Wrapper function for Game debugging?
 
-  // Render to a Canvas
-  api.render = function(canvas_selector, data) {
-    var $scope = angular.element(canvas_selector).scope();
-    if ($scope) {
-      $scope.$apply(function() {
-        $scope.game = data;
-      });
-    }
-    else {
-      console.log("$scope not found in $battlescripts.render()");
-    }
+  // Canvas
+  // ------
+  api.render = function(data) {
+    $rootScope.$broadcast("canvas/render",data);
+  };
+  api.init_canvas = function(template) {
+    $rootScope.$broadcast("canvas/init",template);
   };
 
   return api;
+}]);
+
+// A general-purpose Canvas Controller for painting games
+bsapp.controller("CanvasController", ["$scope", "$battlescripts", "$queryparam", "$compile", "$rootScope", "$element", function($scope, $battlescripts, $queryparam, $compile, $rootScope, $element) {
+  $scope.game={};
+  $rootScope.$on("canvas/render",function(msg,data) {
+    $scope.$apply(function() {
+      $scope.game = data;
+    });
+  });
+  $rootScope.$on("canvas/init",function(msg,template) {
+    // Populate and compile the Game canvas
+    $element.html(template);
+    $compile($element)($scope);
+  })
 }]);
 
 bsapp.factory('$queryparam', function() {

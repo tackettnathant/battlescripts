@@ -12,21 +12,25 @@
 <script type='text/javascript' src='js/angular-sanitize.js'></script>
 <script type='text/javascript' src='js/battlescripts-app.js'></script>
 <script type='text/javascript' src='js/Match.js'></script>
-</head>
-<body ng-app="battlescripts" ng-controller="ScreenController">
+    <script>
+      bsapp.controller("ScreenController", ["$scope", "$battlescripts", function ($scope, $battlescripts) {
+        $scope.games = [];
+        $scope.players = {};
+        $scope.example_game = null;
 
-<h1>Battle Scripts</h1>
+        $scope.play = function() {
+          var code = $('#player').val();
+          var game_source = $scope.example_game.source;
+          $battlescripts.play( Match, game_source, [code,code], {move_delay:250}, function(e) {
+            alert(e);
+          });
+        };
 
-<script>
-  bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$firebaseArray", "$firebaseAuth", function ($scope, $battlescripts, $firebaseArray, $firebaseAuth) {
-    var auth = $firebaseAuth();
-    var ref;
-    $scope.games = [];
-    $scope.players = {};
-//    // login with Facebook
-//    firebase.auth().onAuthStateChanged(function (user) {
-//      if (user) {
-        // User is signed in.
+        $battlescripts.get_game('-Kn6geZ8YpA7w5oCoxzo').then((game)=> {
+          $scope.example_game = game;
+          $battlescripts.init_canvas(game.canvas);
+        });
+
         $battlescripts.get_all_games().then(
           function (list) {
             $scope.games = list;
@@ -42,31 +46,57 @@
             })
           }
         );
-/*
-      } else {
-        //Not signed in
-        auth.$signInWithPopup("google").then(function (firebaseUser) {
-          $battlescripts.get_all_games().then(
-            list => $scope.games = list
-          );
-          $battlescripts.get_all_players().then(
-            (players) => {
-              (players || []).forEach(player => {
-                if (!$scope.players[player.game_id]) {
-                  $scope.players[player.game_id] = [];
-                }
-                $scope.players[player.game_id].push(player);
-              })
-            }
-          )
-        }).catch(function (error) {
-          console.log("Authentication failed:", error);
-        });
+      }]);
+    </script><style>
+    body {
+        background-color:black;
+        color:white;
+    }
+    a { color:white; }
+
+    /* Oops. This is temp */
+    #canvas { color:black; }
+</style>
+</head>
+<body ng-app="battlescripts" ng-controller="ScreenController">
+
+<h1 style="text-align:center;font-size:64px;">BattleScripts</h1>
+
+<div>
+    <img src="img/shall_we_play_a_game.png">
+</div>
+
+<div>
+    Write javascript code to play games. Beat your friends. Conquer your co-workers. May the best algorithm win.
+</div>
+
+<h3>Try It!</h3>
+
+<div>
+    <div style="height:320px;width:500px;float:left;">
+        <textarea style="width:90%;height:90%;" id="player">
+// A stupid random-guessing player
+function () {
+  this.move = function (board) {
+    // Try 50 times to move
+    for (var i = 0; i < 50; i++) {
+      var m = Math.floor(Math.random() * 9);
+      if (board[m] == -1) {
+        return m;
       }
-    });
- */
-  }]);
-</script>
+    }
+    return 0;
+  }
+}
+        </textarea>
+    </div>
+    <div style="height:320px;width:100px;float:left;">
+        <button ng-click="play()">Play!</button>
+    </div>
+    <div id="canvas" ng-controller="CanvasController" style="height:320px;width:295px;float:left;"></div>
+</div>
+
+<br style="clear:both;">
 
 <h3>Play</h3>
 
