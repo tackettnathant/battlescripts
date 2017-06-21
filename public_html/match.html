@@ -41,11 +41,7 @@
     }
     $scope.$watch('game', function() {
       if ($scope.game) {
-        // Initialize the canvas
-        var canvas = angular.element('#canvas');
-        canvas.html($scope.game.canvas);
-        var $canvas_scope = canvas.scope();
-        $compile(canvas)($canvas_scope);
+        $battlescripts.init_canvas($scope.game.canvas);
 
         // Initialize the players array
         $scope.players = new Array($scope.game.max_players).fill(null);
@@ -66,28 +62,11 @@
         });
 
         var match = new Match(game, players,$scope.options);
-        match.subscribe("game.render", function(data) {
-          var scope = angular.element('#canvas').scope();
-          if (scope) {
-            scope.$apply(function() {
-              scope.game = data;
-            });
-          }
-          else {
-            console.log("$scope not found");
-          }
-
-        });
+        match.subscribe("game.render", $battlescripts.render);
         match.subscribe("match.results", function(results) {
-          var scope = angular.element('#canvas').scope();
-          if (scope) {
-            scope.$apply(function() {
-              scope.results = results;
+            $scope.$apply(function() {
+              $scope.results = results;
             });
-          }
-          else {
-            console.log("$scope not found");
-          }
         });
 
         match.start({});
@@ -114,15 +93,15 @@
 
     </div>
 </div>
-<div id="canvas" ng-controller="CanvasController" style="float:left;width:800px;height:600px;border:1px solid black;margin:10px;">
-    CANVAS
+<div style="float:left;width:800px;height:600px;border:1px solid black;margin:10px;">
+<div>
+    Game #{{results.games_played}} of {{results.total_games}}<br>
+    Player 1 (X) Wins: {{results.player_wins[0]}}<br>
+    Player 2 (O) Wins: {{results.player_wins[1]}}<br>
+    Draws: {{results.draws}}<br>
 </div>
-<script>
-bsapp.controller("CanvasController", ["$scope", "$battlescripts", "$timeout", "Restangular", "$compile", function($scope, $battlescripts, $timeout, Restangular, $compile) {
-
-}]);
-</script>
-
+<div ng-controller="CanvasController"></div>
+</div>
 
 </body>
 </html>
