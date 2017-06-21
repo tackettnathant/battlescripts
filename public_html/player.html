@@ -25,7 +25,9 @@
         var game_id = $queryparam.get('game_id');
         $scope.id=id;
         $scope.game_id = game_id;
-        $scope.player = null;
+        $scope.player = {
+          game_id:game_id
+        };
         $scope.game = null;
         $scope.opponents = [];
         $scope.opponent = null;
@@ -45,6 +47,9 @@
           historyEventDelay: 200
         };
 
+        // Initial Load
+        // ------------
+
         // Load game
         $battlescripts.get_game(game_id).then((game)=> {
           $scope.game = game;
@@ -57,37 +62,35 @@
 
         // Load player
         if (!!id) {
-          $battlescripts.get_player(id).then(
-            player => $scope.player=player
-          );
+          $battlescripts.get_player(id)
+            .then( player => $scope.player=player )
         }
-        else {
-          $scope.player = {
-            game_id:game_id
-          };
-        }
-        // Load opponents
-        $battlescripts.search_players({"game_id":game_id}).then( (players)=> {
-          $scope.opponents = players;
-        });
 
+        // Load opponents
+        $battlescripts.search_players({"game_id":game_id})
+          .then( (players)=> $scope.opponents = players )
+
+        // Player Persistence
+        // ------------------
         $scope.save = function() {
-          $battlescripts.login().then((user)=>{
-alert(user);
-            $battlescripts.save_player($scope.player).then(
-              updated_player => $scope.player=updated_player
-            );
-          });
+          $battlescripts.login()
+            .then( user => $battlescripts.save_player($scope.player) )
+            .then( updated_player => $scope.player=updated_player )
+            .then( () => $scope.console.log("<span>[Save]</span> Successful","success") )
+            .catch( (err) => $scope.console.log("<span>[Save]</span> Error with Save: "+err.tostring(),"error") )
         };
 
-        $scope.delete = function() {
+        $scope.delete_player = function() {
           if (confirm("Are you sure?")) {
-            $battlescripts.delete_player($scope.player).then(()=>{
-              window.location.href="/";
-            });
+            $battlescripts.login()
+              .then( () => $battlescripts.delete_player($scope.player) )
+              .then( ()=>{ window.location.href="/"; } )
+              .catch( (err) => $scope.console.log("<span>[Save]</span> Error with Delete: "+err.tostring(),"error") )
           }
         };
 
+        // Debugging
+        // ---------
         $scope.debugger_paused=false;
         $scope.debugger_pause = function(value) {
           var ret = value;
@@ -107,6 +110,8 @@ alert(user);
           return ret;
         };
 
+        // Game Runner
+        // -----------
         $scope.test = function() {
           // START THE MATCH!!!
           var Game = eval($scope.game.source);
@@ -141,6 +146,8 @@ alert(user);
             render_history:true
           });
 
+          // Render
+
           match.subscribe("game.render", function(data) {
             $battlescripts.render('#canvas',data);
           });
@@ -157,11 +164,14 @@ alert(user);
           }
         };
         $rootScope.$on('log/player',function(data,msg) {
-          $scope.console.log("<span>[player]</span>"+msg,"log_player");
+          $scope.console.log("<span>[player]</span>"+msg,"player");
         });
         $rootScope.$on('error/player',function(data,msg) {
-          $scope.console.log("<span>[player error]</span>"+msg,"log_player_error");
-        })
+          $scope.console.log("<span>[player error]</span>"+msg,"error");
+        });
+        $rootScope.$on('compile/success',function(data,msg) {
+          $scope.console.log("<span>[player]</span> Compiled Successfully","success");
+        });
       }]);
 
       bsapp.controller("CanvasController", ["$scope", "$battlescripts", "$queryparam", "$compile", function($scope, $battlescripts, $queryparam, $compile) {
@@ -170,14 +180,37 @@ alert(user);
 
     </script>
     <style>
-    /* FLEXBOX Layout stolen from the web */
+        /* Console */
+        #console {
+            font-family:monospace;
+            font-size:90%;
+        }
+        #console .entry {
+            color:#333;
+        }
+        #console .entry span {
+            color:#999;
+            margin-right:5px;
+        }
+        #console .entry.success {
+            background-color:green;
+            color:white;
+        }
+        #console .entry.error {
+            background-color:red;
+            color:white;
+        }
+        .title {
+            font-size:150%;
+            font-weight:bold;
+        }
 
+    /* FLEXBOX Layout stolen from the web */
     html, body, .viewport {
         width: 100%;
         height: 100%;
         margin: 0;
     }
-
     .panel {
         border: 1px solid black;
         padding: 0.25em;
@@ -188,77 +221,65 @@ alert(user);
 
     /* items flex/expand vertically */
     .vbox {
-        display: -webkit-flex;
-        display:    -moz-flex;
-        display:     -ms-flex;
         display:         flex;
-        -webkit-flex-direction: column;
-        -moz-flex-direction: column;
-        -ms-flex-direction: column;
         flex-direction: column;
     }
     /* items flex/expand horizontally */
     .hbox {
-        display: -webkit-flex;
-        display:    -moz-flex;
-        display:     -ms-flex;
         display:         flex;
-        -webkit-flex-direction: row;
-        -moz-flex-direction: row;
-        -ms-flex-direction: row;
         flex-direction: row;
     }
     .space-between {
-        -webkit-justify-content: space-between;
-        -moz-justify-content: space-between;
-        -ms-justify-content: space-between;
         justify-content: space-between;
     }
-
-    /* I went with a fixed height header & footer because it's a common case.
-      This could easily be altered to flex proportionally with the page.
-    */
     .header {
-        height: 100px;
+        height: 30px;
     }
     .footer {
         height:150px;
     }
-
     .main {
-        -webkit-flex: 1;
-        -moz-flex: 1;
-        -ms-flex: 1;
         flex: 1;
     }
     .main > * {
-        -webkit-flex: 4;
-        -moz-flex: 4;
-        -ms-flex: 4;
-        flex: 4;
+        flex-grow: 4;
+        resize:horizontal;
     }
-    .left {
-        -webkit-flex: 1.5;
-        -moz-flex: 1.5;
-        -ms-flex: 1.5;
-        flex: 1.5;
+    .details {
+        flex-grow: 1.5;
     }
+        .details label {
+            font-weight:bold;
+            text-decoration:underline;
+        }
+        .details div {
+            margin-bottom:5px;
+        }
     </style>
 </head>
 
 <body class="vbox" ng-app="battlescripts" ng-controller="ScreenController">
-<div class="panel header">
-    <h1>Player Editor : {{game.name}}</h1>
-    <a href="/">Home</a>
+<div class=" header">
+    <div class="title"><a href="/">BattleScripts</a> / Player Editor</div>
 </div>
 <div class="main hbox space-between">
-    <div class="panel left">
-        <div>Name: <input ng-model="player.name"> (id: {{player.id}})</div>
-        <div>Description: <input ng-model="player.description"></div>
+    <div class="panel details">
+
+        <label>Game</label>
+        <div>{{game.name}}</div>
+
+        <label>Player Name</label>
+        <div><input ng-model="player.name"></div>
+
+        <label>Description</label>
+        <div><input ng-model="player.description"></div>
+
         <div>
-            <button ng-click="save()">Save</button>
-            <button ng-click="delete()">Delete</button>
+            <div><button ng-click="save()">Save</button></div>
+            <div><button ng-click="delete_player()">Delete</button></div>
         </div>
+
+        <div>{{player.$id}}</div>
     </div>
     <div class="panel source">
         <h2>Source Editor</h2>

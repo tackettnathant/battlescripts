@@ -149,9 +149,12 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
   // AUTH
   // ----
   api.user = firebase.auth().currentUser;
+  firebase.auth().onAuthStateChanged(function (user) {
+    api.user = user || null;
+  });
   api.login = function() {
     return new Promise((resolve,reject)=>{
-      if (api.user) { resolve(api.user); }
+      if (api.user) { return resolve(api.user); }
       return $firebaseAuth().$signInWithPopup("google").then((userCredential)=>{
         api.user = userCredential.user;
         resolve(api.user);
