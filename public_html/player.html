@@ -145,7 +145,7 @@
           // Render
 
           match.subscribe("game.render", function(data) {
-            $battlescripts.render('#canvas',data);
+            $battlescripts.render(data);
           });
           match.start({});
         };
