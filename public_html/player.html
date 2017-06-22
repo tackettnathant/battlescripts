@@ -239,6 +239,7 @@
     }
     .details {
         flex-grow: 1.5;
+        max-width:200px;
     }
         .details label {
             font-weight:bold;
@@ -246,6 +247,25 @@
         }
         .details div {
             margin-bottom:5px;
+        }
+
+        .panel .title {
+            height:24px;
+            font-size:20px;
+            background-color:#ccc;
+            cursor:pointer;
+        }
+        .panel.collapsed {
+            flex-grow:0;
+        }
+        .panel.collapsed * {
+            display:none;
+        }
+        .panel.collapsed .title {
+            display:block;
+            width:24px;
+            writing-mode: vertical-lr;
+            text-orientation: sideways;
         }
     </style>
 </head>
@@ -256,6 +276,7 @@
 </div>
 <div class="main hbox space-between">
     <div class="panel details">
+        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Details</div>
 
         <label>Game</label>
         <div>{{game.name}}</div>
@@ -274,13 +295,13 @@
         <div>{{player.$id}}</div>
     </div>
     <div class="panel source">
-        <h2>Source Editor</h2>
+        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Source</div>
         <div>
             <textarea codemirror="conf" style="width:90%;height:300px;" ng-model="player.source"></textarea>
         </div>
     </div>
     <div class="panel test">
-        <h2>Tester</h2>
+        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Tester</div>
         <div>Test Opponent: <select ng-options="p as p.name for p in opponents track by p.$id" ng-model="opponent"></select></div>
 
         <div>
@@ -288,9 +309,11 @@
         </div>
         <div id="canvas" ng-controller="CanvasController" style=""></div>
     </div>
-    <div class="panel debugger">
-        <h2>Debugger</h2>
-        <input type="checkbox" ng-model="debug"> Enable Debugging
+    <div class="panel collapsed debugger">
+        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Debugger</div>
+        <div>
+            <input type="checkbox" ng-model="debug"> Enable Debugging
+        </div>
         <div ng-id="debug">
             <div ng-show="debugger_paused">
                 {{debugger_message}}<br>
@@ -302,9 +325,13 @@
             <textarea id="debugger_move" ng-model="debugger_move" style="width:90%;height:100px;"></textarea>
         </div>
     </div>
-    <div class="panel documentation">
-        <h2>Game Documentation</h2>
+    <div class="panel collapsed documentation">
+        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Game Documentation</div>
         <div ng-bind-html="game.documentation | markdown"></div>
+    </div>
+    <div class="panel collapsed documentation">
+        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Player API Documentation</div>
+        blah
     </div>
 </div>
 <div class="panel footer" id="console">

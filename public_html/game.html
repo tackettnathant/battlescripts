@@ -15,59 +15,96 @@
 </head>
 <body ng-app="battlescripts" ng-controller="ScreenController">
 
-<h1>Game Editor</h1>
-<a href="/">Home</a>
-
 <script>
-bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", function($scope, $battlescripts, $queryparam) {
-  var id = $queryparam.get('id');
-  $scope.id=id;
-  $scope.game = null;
-  if (!!id) {
-    $battlescripts.get_game(id).then(
-      game => $scope.game=game
+  bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", "$compile", function($scope, $battlescripts, $queryparam, $compile) {
+    $scope.game_id = $queryparam.get('game_id');
+    $scope.players = [];
+    $scope.player_list = [];
+    $scope.game = null;
+    $scope.results = null;
+    $scope.options = {
+      total_games:10,
+      move_delay:100,
+      render_history:true
+    };
+
+    $battlescripts.get_game($scope.game_id).then(
+        game => $scope.game=game
     );
-  }
-  else {
-    $scope.game = {};
-  }
+    $scope.$watch('game', function() {
+      if ($scope.game) {
+        $battlescripts.init_canvas($scope.game.canvas);
 
-  $scope.save = function() {
-      $battlescripts.save_game($scope.game).then(
-        updated_game => $scope.game=updated_game
-      );
-  };
+        // Initialize the players array
+        $scope.players = new Array($scope.game.max_players).fill(null);
 
-  $scope.delete = function() {
-    if (confirm("Are you sure?")) {
-      $battlescripts.delete_game($scope.game).then(()=>{
-        window.location.href="/";
-      });
-    }
-  }
-}]);
+        // Retrieve a list of available players for this game
+        $battlescripts.search_players({"game_id":$scope.game.$id}).then(
+          players=>$scope.player_list=players
+        )
+      }
+    });
+
+    $scope.start = function() {
+        var Game = eval($scope.game.source);
+        var game = new Game();
+        var players = [];
+        $scope.players.forEach( p=>{
+          players.push( new $battlescripts.Player(p.source) );
+        });
+
+        var match = new Match(game, players,$scope.options);
+        match.subscribe("game.render", $battlescripts.render);
+        match.subscribe("match.results", function(results) {
+            $scope.$apply(function() {
+              $scope.results = results;
+            });
+        });
+
+      match.start({});
+      };
+  }]);
 </script>
 
-<div ng-if="id && !game">Loading...</div>
-<div ng-if="!id || game">
-    <div>
-        <button ng-click="save()">Save</button>
-        <button ng-click="delete()">Delete</button>
+<h1>{{game.name}}</h1>
+<a href="/">Home</a>
+<br style="clear:both;">
+
+<div style="float:left;width:200px;min-height:600px;">
+    <div style="margin:10px;">
+
     </div>
-    <div>Name: <input ng-model="game.name"> (id: {{game.$id}})</div>
-    <div>Max Players: <input type="number" min="2" ng-model="game.max_players"></div>
-    <div>Source</div>
     <div>
-        <textarea style="width:800px;height:300px;" ng-model="game.source"></textarea>
+        <a href="player.html?game_id={{game.$id}}">Create A Player</a>
     </div>
-    <div>Canvas</div>
+    <div style="margin:10px;">
+        <div>Players:</div>
+        <div ng-repeat="p in players track by $index">
+            {{$index+1}}. <select ng-options="p as p.name for p in player_list track by p.$id" ng-model="players[$index]"></select>
+        </div>
+    </div>
+    <div style="margin:10px;">
+        <div>Options:</div>
+        Number of games: <input ng-model="options.total_games" size="4"><br>
+        Move delay: <input ng-model="options.move_delay" size="5"><br>
+        <button ng-click="start()">Start</button>
+
+    </div>
     <div>
-        <textarea style="width:800px;height:300px;" ng-model="game.canvas"></textarea>
+        <div>Edit Players:</div>
+        <div ng-repeat="p in player_list">
+            <a href="player.html?game_id={{game.$id}}&id={{p.$id}}">{{p.name}}</a>
+        </div>
     </div>
-    <div>Documentation (Markdown)</div>
-    <div>
-        <textarea style="width:800px;height:300px;" ng-model="game.documentation"></textarea>
-    </div>
+</div>
+<div style="float:left;width:800px;height:600px;border:1px solid black;margin:10px;">
+<div>
+    Game #{{results.games_played}} of {{results.total_games}}<br>
+    Player 1 (X) Wins: {{results.player_wins[0]}}<br>
+    Player 2 (O) Wins: {{results.player_wins[1]}}<br>
+    Draws: {{results.draws}}<br>
+</div>
+<div ng-controller="CanvasController"></div>
 </div>
 
 </body>

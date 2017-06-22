@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>Battle Scripts</title>
+    <script>var module={}; // To allow module.exports not to fail</script>
+
+    <script type="text/javascript" src="js/jquery.js"></script>
+<script type='text/javascript' src='js/angular.js'></script>
+<script type='text/javascript' src='js/firebase.js'></script>
+<script type='text/javascript' src='js/angularfire.js'></script>
+<script type='text/javascript' src='js/angular-sanitize.js'></script>
+<script type='text/javascript' src='js/battlescripts-app.js'></script>
+<script type='text/javascript' src='js/Match.js'></script>
+</head>
+<body ng-app="battlescripts" ng-controller="ScreenController">
+
+<h1>Game Editor</h1>
+<a href="/">Home</a>
+
+<script>
+bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", function($scope, $battlescripts, $queryparam) {
+  var id = $queryparam.get('id');
+  $scope.id=id;
+  $scope.game = null;
+  if (!!id) {
+    $battlescripts.get_game(id).then(
+      game => $scope.game=game
+    );
+  }
+  else {
+    $scope.game = {};
+  }
+
+  $scope.save = function() {
+      $battlescripts.save_game($scope.game).then(
+        updated_game => $scope.game=updated_game
+      );
+  };
+
+  $scope.delete = function() {
+    if (confirm("Are you sure?")) {
+      $battlescripts.delete_game($scope.game).then(()=>{
+        window.location.href="/";
+      });
+    }
+  }
+}]);
+</script>
+
+<div ng-if="id && !game">Loading...</div>
+<div ng-if="!id || game">
+    <div>
+        <button ng-click="save()">Save</button>
+        <button ng-click="delete()">Delete</button>
+    </div>
+    <div>Name: <input ng-model="game.name"> (id: {{game.$id}})</div>
+    <div>Max Players: <input type="number" min="2" ng-model="game.max_players"></div>
+    <div>Source</div>
+    <div>
+        <textarea style="width:800px;height:300px;" ng-model="game.source"></textarea>
+    </div>
+    <div>Canvas</div>
+    <div>
+        <textarea style="width:800px;height:300px;" ng-model="game.canvas"></textarea>
+    </div>
+    <div>Documentation (Markdown)</div>
+    <div>
+        <textarea style="width:800px;height:300px;" ng-model="game.documentation"></textarea>
+    </div>
+</div>
+
+</body>
+</html>
+

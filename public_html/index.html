@@ -107,12 +107,62 @@ function () {
 
 <br style="clear:both;">
 
+<!--
 <h3>Play</h3>
 
 <a href="match.html">Play a game</a>
+-->
 
-<h3>Games</h3>
+<style>
+    .games {
+        text-align:center;
+    }
+    .games .title {
+        font-size:64px;
+        margin:20px 0;
+    }
+    .game {
+        border:1px solid white;
+        padding:15px;
+        width:50%;
+        margin-left:auto;
+        margin-right:auto;
+        margin-bottom:50px;
+    }
+    .game a {
+        text-decoration:none;
+    }
+    .game .logo {
+        border:1px solid white;
+        float:left;
+        width:256px;
+        height:256px;
+        margin-right:25px;
+    }
+    .game .title {
+        font-size:48px;
+        font-family:arial;
+    }
+    .game .footer {
+        clear:both;
+    }
+</style>
+<div class="games">
+    <div class="title">Games</div>
+    <div class="game" ng-repeat="game in games">
+        <a href="game.html?game_id={{game.$id}}">
+            <div class="logo"></div>
+            <div class="body">
+                <div class="title">{{game.name}}</div>
+                <div class="description">{{game.description}}</div>
+            </div>
+            <div class="footer"></div>
+        </a>
+    </div>
 
+</div>
+
+<!--
 <ul>
     <li ng-repeat="game in games">
         <a href="game.html?id={{game.$id}}">{{game.name}}</a>
@@ -122,7 +172,8 @@ function () {
         </ul>
     </li>
 </ul>
-<a href="game.html">Add a new game</a>
+<a href="dev-game.html">Add a new game</a>
+-->
 
 </body>
 </html>
