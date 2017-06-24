@@ -1,16 +1,19 @@
 const functions = require('firebase-functions');
 
-exports.on_create_player = functions.database.ref('/players/{id}').onWrite(event => {
-  // Only edit data when it is first created.
+exports.on_player = functions.database.ref('/players/{id}').onWrite(event => {
   if (event.data.previous.exists()) {
+    // UPDATE
     console.log("Previous value exists, exiting");
 	return;
   }
-  // Exit when the data is deleted.
-  if (!event.data.exists()) {
+  else if (!event.data.exists()) {
+    // DELETE
     console.log("Deleting, exiting");
 	return;
   }
-  console.log("Writing a generated attribute");
-  return event.data.ref.child('created_on').set( (new Date()).getTime() );
+  else {
+    // CREATE
+    console.log("Writing a generated attribute");
+    return event.data.ref.child('created_on').set( (new Date()).getTime() );
+  }
 });
