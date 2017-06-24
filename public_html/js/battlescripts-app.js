@@ -275,6 +275,7 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
       (()=>{
         var console={
           log:function(m){
+            if (typeof m!=="string") { m=JSON.stringify(m); }
             $rootScope.$broadcast("log/player",m);
           }
         };
