@@ -31,6 +31,7 @@
         $scope.game = null;
         $scope.opponents = [];
         $scope.opponent = null;
+        $scope.autoplay = true;
 
         // Editor config
         $scope.conf = {
@@ -73,9 +74,18 @@
             .then( user => $battlescripts.save_player($scope.player) )
             .then( updated_player => $scope.player=updated_player )
             .then( () => $scope.console.log("<span>[Save]</span> Successful","success") )
+            .then( () => { if($scope.autoplay) { $scope.test(); } })
             .catch( (err) => $scope.console.log("<span>[Save]</span> Error with Save: "+err.tostring(),"error") )
         };
-
+        $(document).bind('keydown', function(e) {
+          if(e.ctrlKey && (e.which == 83)) {
+            e.preventDefault();
+            if ($scope.player && $scope.player.$id) {
+              $scope.save();
+            }
+            return false;
+          }
+        });
         $scope.delete_player = function() {
           if (confirm("Are you sure?")) {
             $battlescripts.login()
@@ -209,6 +219,8 @@
         margin: 0.25em;
         border-radius: 0.25em;
         overflow:auto;
+        display:flex;
+        flex-direction:column;
     }
 
     /* items flex/expand vertically */
@@ -266,6 +278,7 @@
             width:24px;
             writing-mode: vertical-lr;
             text-orientation: sideways;
+            flex-grow:1;
         }
     </style>
 </head>
@@ -296,14 +309,16 @@
     </div>
     <div class="panel source">
         <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Source</div>
-        <div>
-            <textarea codemirror="conf" style="width:90%;height:300px;" ng-model="player.source"></textarea>
+        <div style="flex-grow:1;">
+            <textarea codemirror="conf" ng-model="player.source"></textarea>
         </div>
     </div>
     <div class="panel test">
         <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Tester</div>
-        <div>Test Opponent: <select ng-options="p as p.name for p in opponents track by p.$id" ng-model="opponent"></select></div>
-
+        <div>
+            Test Opponent: <select ng-options="p as p.name for p in opponents track by p.$id" ng-model="opponent"></select>
+            <input type="checkbox" ng-model="autoplay"> Auto play when saved
+        </div>
         <div>
             <button ng-click="test()">Play A Test Game</button>
         </div>
@@ -331,7 +346,9 @@
     </div>
     <div class="panel collapsed documentation">
         <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Player API Documentation</div>
-        blah
+        <div>
+            This will be static content
+        </div>
     </div>
 </div>
 <div class="panel footer" id="console">
