@@ -32,6 +32,9 @@
         $scope.opponents = [];
         $scope.opponent = null;
         $scope.autoplay = true;
+        $scope.user = null;
+        // Put the user into $scope
+        $battlescripts.get_user().then( user=>$scope.user=user );
 
         // Editor config
         $scope.conf = {
@@ -290,22 +293,25 @@
     </style>
 </head>
 
-<body class="vbox" ng-app="battlescripts" ng-controller="ScreenController">
-<div class=" header">
-    <div class="title"><a href="/">BattleScripts</a> / Player Editor</div>
-</div>
-<div class="main hbox space-between">
-    <div class="panel details">
-        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Details</div>
+<body ng-app="battlescripts" ng-controller="ScreenController">
+<div ng-show="!game || !id || !player.$id" style="height:100%;">Loading...</div>
+<div ng-show="game && (!id || player.$id)" class="vbox" style="height:100%;">
+    <div class=" header">
+        <div class="title"><a href="/">BattleScripts</a> / Player Editor</div>
+    </div>
+    <div class="main hbox space-between">
+        <div class="panel details">
+            <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Details</div>
 
-        <label>Game</label>
-        <div>{{game.name}}</div>
+            <label>Game</label>
+            <div>{{game.name}}</div>
 
-        <label>Player Name</label>
-        <div><input ng-model="player.name"></div>
+            <label>Player Name</label>
+            <div><input ng-model="player.name"></div>
 
-        <label>Description</label>
-        <div><input ng-model="player.description"></div>
+            <label>Description</label>
+            <div><input ng-model="player.description"></div>
+
 
         <div>
             <div><button ng-click="save()">Save</button></div>
@@ -313,54 +319,62 @@
             <div><button ng-click="delete_player()">Delete</button></div>
         </div>
 
-        <div>{{player.$id}}</div>
-    </div>
-    <div class="panel source">
-        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Source</div>
-        <div style="flex-grow:1;">
-            <textarea codemirror="conf" ng-model="player.source"></textarea>
-        </div>
-    </div>
-    <div class="panel test">
-        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Tester</div>
-        <div>
-            Test Opponent: <select ng-options="p as p.name for p in opponents track by p.$id" ng-model="opponent"></select>
-            <input type="checkbox" ng-model="autoplay"> Auto play when saved
-        </div>
-        <div>
-            <button ng-click="test()">Play A Test Game</button>
-        </div>
-        <div id="canvas" ng-controller="CanvasController" style=""></div>
-    </div>
-    <div class="panel collapsed debugger">
-        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Debugger</div>
-        <div>
-            <input type="checkbox" ng-model="debug"> Enable Debugging
-        </div>
-        <div ng-id="debug">
-            <div ng-show="debugger_paused">
-                {{debugger_message}}<br>
-                <button id="debugger_continue" ng-click="debugger_continue()">Continue</button>
+            <div>Player id:<br>{{player.$id}}</div>
+            <div>User Details:<br>
+                <img src="{{user.photoURL}}" style="max-width:75px;"><br>
+                {{user.displayName}}<br>
+                uid: {{user.uid}}<br>
+                {{user.email}}<br>
+                Provider: {{user.providerData[0].providerId}}
             </div>
-            <div>Game Data:</div>
-            <textarea id="debugger_data" ng-model="debugger_data" style="width:90%;height:200px;"></textarea>
-            <div>Player Move:</div>
-            <textarea id="debugger_move" ng-model="debugger_move" style="width:90%;height:100px;"></textarea>
+        </div>
+        <div class="panel source">
+            <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Source</div>
+            <div style="flex-grow:1;">
+                <textarea codemirror="conf" ng-model="player.source"></textarea>
+            </div>
+        </div>
+        <div class="panel test">
+            <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Tester</div>
+            <div>
+                Test Opponent: <select ng-options="p as p.name for p in opponents track by p.$id" ng-model="opponent"></select>
+                <input type="checkbox" ng-model="autoplay"> Auto play when saved
+            </div>
+            <div>
+                <button ng-click="test()">Play A Test Game</button>
+            </div>
+            <div id="canvas" ng-controller="CanvasController" style=""></div>
+        </div>
+        <div class="panel collapsed debugger">
+            <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Debugger</div>
+            <div>
+                <input type="checkbox" ng-model="debug"> Enable Debugging
+            </div>
+            <div ng-id="debug">
+                <div ng-show="debugger_paused">
+                    {{debugger_message}}<br>
+                    <button id="debugger_continue" ng-click="debugger_continue()">Continue</button>
+                </div>
+                <div>Game Data:</div>
+                <textarea id="debugger_data" ng-model="debugger_data" style="width:90%;height:200px;"></textarea>
+                <div>Player Move:</div>
+                <textarea id="debugger_move" ng-model="debugger_move" style="width:90%;height:100px;"></textarea>
+            </div>
+        </div>
+        <div class="panel collapsed documentation">
+            <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Game Documentation</div>
+            <div ng-bind-html="game.documentation | markdown"></div>
+        </div>
+        <div class="panel collapsed documentation">
+            <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Player API Documentation</div>
+            <div>
+                This will be static content
+            </div>
         </div>
     </div>
-    <div class="panel collapsed documentation">
-        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Game Documentation</div>
-        <div ng-bind-html="game.documentation | markdown"></div>
+    <div class="panel footer" id="console">
+        Console
     </div>
-    <div class="panel collapsed documentation">
-        <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Player API Documentation</div>
-        <div>
-            This will be static content
-        </div>
-    </div>
-</div>
-<div class="panel footer" id="console">
-    Console
 </div>
 
 </body>
