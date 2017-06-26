@@ -15,6 +15,7 @@
 
     <script type="text/javascript" src="/lib/codemirror-3.20/lib/codemirror.js"></script>
     <script type="text/javascript" src="/lib/codemirror-3.20/mode/javascript/javascript.js"></script>
+    <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/lib/codemirror-3.20/lib/codemirror.css" />
     <link rel="stylesheet" href="/lib/codemirror-3.20/theme/mdn-like.css" />
     <script type='text/javascript' src='js/micromarkdown.js'></script>
@@ -33,8 +34,6 @@
         $scope.opponent = null;
         $scope.autoplay = true;
         $scope.user = null;
-        // Put the user into $scope
-        $battlescripts.get_user().then( user=>$scope.user=user );
 
         // Editor config
         $scope.conf = {
@@ -270,6 +269,9 @@
         .details div {
             margin-bottom:5px;
         }
+        .editor {
+            box-sizing: content-box;
+        }
 
         .panel .title {
             height:24px;
@@ -296,8 +298,11 @@
 <body ng-app="battlescripts" ng-controller="ScreenController">
 <div ng-show="!game || !id || !player.$id" style="height:100%;">Loading...</div>
 <div ng-show="game && (!id || player.$id)" class="vbox" style="height:100%;">
-    <div class=" header">
-        <div class="title"><a href="/">BattleScripts</a> / Player Editor</div>
+    <div class="header">
+        <div style="float:right;height:30px;min-width:100px;border:2px solid black;border-radius:10px;padding:0 10px;line-height:28px;font-size:14px;">
+            <img src="{{user.photoURL}}" style="max-height:24px;"> {{user.displayName}}
+        </div>
+        <div class="title"><a href="/">BattleScripts</a> / <a href="game.html?game_id={{game.$id}}">{{game.name}}</a> / Player Editor</div>
     </div>
     <div class="main hbox space-between">
         <div class="panel details">
@@ -320,19 +325,10 @@
         </div>
 
             <div>Player id:<br>{{player.$id}}</div>
-            <div>User Details:<br>
-                <img src="{{user.photoURL}}" style="max-width:75px;"><br>
-                {{user.displayName}}<br>
-                uid: {{user.uid}}<br>
-                {{user.email}}<br>
-                Provider: {{user.providerData[0].providerId}}
-            </div>
         </div>
         <div class="panel source">
             <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Source</div>
-            <div style="flex-grow:1;">
-                <textarea codemirror="conf" ng-model="player.source"></textarea>
-            </div>
+            <div class="editor" style="flex-grow:1;"><textarea codemirror="conf" ng-model="player.source"></textarea></div>
         </div>
         <div class="panel test">
             <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Tester</div>
@@ -343,7 +339,7 @@
             <div>
                 <button ng-click="test()">Play A Test Game</button>
             </div>
-            <div id="canvas" ng-controller="CanvasController" style=""></div>
+            <div id="canvas" ng-controller="CanvasController" style="box-sizing:content-box;"></div>
         </div>
         <div class="panel collapsed debugger">
             <div class="title" onclick="$(this.parentNode).toggleClass('collapsed')">Debugger</div>
