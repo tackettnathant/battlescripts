@@ -63,6 +63,7 @@
         if (!!id) {
           $battlescripts.login().then((user)=>$battlescripts.get_player(id))
             .then( player => {
+console.log(player);
               $scope.player=player;
               $scope.$apply();
             } )
@@ -84,7 +85,7 @@
             .then( updated_player => $scope.player=updated_player )
             .then( () => $scope.console.log("<span>[Save]</span> Successful","success") )
             .then( () => { if($scope.autoplay) { $scope.test(); } })
-            .catch( (err) => $scope.console.log("<span>[Save]</span> Error with Save: "+err.tostring(),"error") )
+            .catch( (err) => $scope.console.log("<span>[Save]</span> Error with Save: "+err.toString(),"error") )
         };
         $(document).bind('keydown', function(e) {
           if(e.ctrlKey && (e.which == 83)) {
@@ -100,7 +101,7 @@
             $battlescripts.login()
               .then( () => $battlescripts.delete_player($scope.player) )
               .then( ()=>{ window.location.href="/"; } )
-              .catch( (err) => $scope.console.log("<span>[Save]</span> Error with Delete: "+err.tostring(),"error") )
+              .catch( (err) => $scope.console.log("<span>[Save]</span> Error with Delete: "+err.toString(),"error") )
           }
         };
 

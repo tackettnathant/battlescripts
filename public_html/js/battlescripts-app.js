@@ -175,12 +175,26 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
   });
   api.login = function() {
     return new Promise((resolve,reject)=>{
-      if (api.user) { return resolve(api.user); }
-      return $firebaseAuth().$signInWithPopup("google").then((userCredential)=>{
-        api.user = userCredential.user;
-        resolve(api.user);
-      }).catch((err)=>{
-        reject(err);
+      if (api.user) {
+console.log(1);
+        return resolve(api.user);
+      }
+      $firebaseAuth().$waitForSignIn().then((user)=>{
+        if (user) {
+          api.user=user;
+console.log(user);
+          return resolve(user);
+        }
+        else {
+          return $firebaseAuth().$signInWithPopup("google").then((userCredential)=>{
+            api.user = userCredential.user;
+console.log(3);
+            return resolve(api.user);
+          }).catch((err)=>{
+console.log(err);
+            reject(err);
+          });
+        }
       });
     });
   };
