@@ -91,10 +91,15 @@ bsapp.directive("codemirror", function($timeout) {
           scope.$digest();
         });
       });
+
       //Listen for parent resize
       scope.$watch(
           function() { return elem.parentNode.clientHeight; },
-          function() { editor.setSize(null, elem.parentNode.clientHeight); }
+          function() {
+            if (elem.parentNode.clientHeight>0) {
+              editor.setSize(null, elem.parentNode.clientHeight);
+            }
+          }
       );
 
       //Keeps the model in sync
@@ -146,6 +151,27 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
   api.user = firebase.auth().currentUser;
   firebase.auth().onAuthStateChanged(function (user) {
     api.user = user || null;
+    // This is a hack for convenience. Don't do this. Or do.
+    // It injects the auth user into the scope of every controller on the page.
+    if (user) {
+      var inject = function(el) {
+        //console.log(el, el.scope);
+        if (el && el.scope) {
+          var $scope = el.scope();
+          $scope.$apply(function () {
+            $scope.user = user;
+          });
+        }
+        else {
+          setTimeout(function() {
+            inject(el);
+          },100);
+        }
+      };
+      angular.element('*[ng-controller]').each((i, el) => {
+        inject(angular.element(el));
+      });
+    }
   });
   api.login = function() {
     return new Promise((resolve,reject)=>{
@@ -155,14 +181,6 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
         resolve(api.user);
       }).catch((err)=>{
         reject(err);
-      });
-    });
-  };
-  api.get_user = function() {
-    return new Promise((resolve)=>{
-      if (api.user) { resolve(api.user); }
-      firebase.auth().onAuthStateChanged(function (user) {
-        if (user) { resolve(user); }
       });
     });
   };
