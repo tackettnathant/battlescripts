@@ -127,12 +127,14 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
 
   //Initialize firebase
   var config = {
+
     apiKey: "AIzaSyDvWaytF9BXDJ0ra9hwqwPKnCM0LSWPAbM",
     authDomain: "battlescripts-161a3.firebaseapp.com",
     databaseURL: "https://battlescripts-161a3.firebaseio.com",
     projectId: "battlescripts-161a3",
     storageBucket: "battlescripts-161a3.appspot.com",
     messagingSenderId: "877337823986"
+
     /*
     apiKey: "AIzaSyAwQvAx4apZtW4fa3nLYeoy5wAEohQohj0",
     authDomain: "battlescripts-eb59b.firebaseapp.com",
@@ -145,6 +147,7 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
   firebase.initializeApp(config);
   var gameRef=firebase.database().ref().child("games");
   var playerRef=firebase.database().ref().child("players");
+  var userRef=firebase.database().ref().child("users");
 
   // AUTH
   // ----
@@ -198,10 +201,16 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
 
   api.get_my_players = (game_id)=>{
     // game_id is optional, if missing then get all players for all games
-
+    var userPlayerRef=firebase.database().ref("users/"+api.user.uid+"/players");
+    if (game_id){
+      var q = userPlayerRef.orderByChild("game_id").equalTo(game_id);
+      return $firebaseArray(query).$loaded();
+    } else {
+      return $firebaseArray(userPlayerRef).$loaded().catch(()=>[]);
+    }
   };
 
-  api.get_player = (id) => $firebaseObject(playerRef.child(id)).$loaded().catch(()=>{});
+  api.get_player = (id) => $firebaseObject(firebase.database().ref("users/"+api.user.uid+"/players").child(id)).$loaded().catch(()=>{});
 
   api.search_players = function(params) {
     var param=Object.keys(params)[0];
@@ -217,7 +226,8 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
     }
     else {
       // Create
-      return $firebaseArray(playerRef).$add( player ).then(ref=>$firebaseObject(ref).$loaded());
+      var userPlayerRef=firebase.database().ref("users/"+api.user.uid+"/players");
+      return $firebaseArray(userPlayerRef).$add( player ).then(ref=>$firebaseObject(ref).$loaded());
     }
   };
   api.delete_player = function( player ) {

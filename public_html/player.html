@@ -59,8 +59,11 @@
 
         // Load player
         if (!!id) {
-          $battlescripts.get_player(id)
-            .then( player => $scope.player=player )
+          $battlescripts.login().then((user)=>$battlescripts.get_player(id))
+            .then( player => {
+              $scope.player=player;
+              $scope.$apply();
+            } )
         }
 
         // Load opponents
@@ -69,6 +72,10 @@
 
         // Player Persistence
         // ------------------
+        $scope.publish = function() {
+          $scope.player.published=$scope.player.source;
+          $scope.save();
+        };
         $scope.save = function() {
           $battlescripts.login()
             .then( user => $battlescripts.save_player($scope.player) )
@@ -302,6 +309,7 @@
 
         <div>
             <div><button ng-click="save()">Save</button></div>
+            <div><button ng-click="publish()">Publish</button></div>
             <div><button ng-click="delete_player()">Delete</button></div>
         </div>
 
@@ -357,4 +365,3 @@
 
 </body>
 </html>
-

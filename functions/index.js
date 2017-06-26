@@ -1,6 +1,26 @@
 const functions = require('firebase-functions');
-//const auth = require('firebase-auth');
+const admin = require('firebase-admin');
+admin.initializeApp(functions.config().firebase);
 
+
+exports.publish_player = functions.database.ref('/users/{uid}/players/{playerId}/published').onWrite(event => {
+  if (!event.data || !event.data.val()){
+    return admin.database().ref('/players').child(event.params.playerId).remove();
+  } else {
+    return admin.database().ref('/users/'+event.params.uid+'/players/'+event.params.playerId)
+            .once("value")
+            .then((snapshot)=>{
+              var player={};
+              player.source=snapshot.val().source;
+              player.game_id=snapshot.val().game_id;
+              player.name=snapshot.val().name;
+              admin.database().ref('/players').child(event.params.playerId).set(player);
+            })
+  }
+
+});
+
+/*
 exports.on_player = functions.database.ref('/players/{id}').onWrite(event => {
   console.log(JSON.stringify(event));
   console.log(event.auth.variable.uid);
@@ -45,3 +65,4 @@ exports.on_player_created_by = functions.database.ref('/players/{id}').onWrite(e
     return event.data.ref.child('created_by').set(uid);
   }
 });
+*/

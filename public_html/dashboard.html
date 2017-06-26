@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+  <title>Battle Scripts</title>
+    <script>var module={}; // To allow module.exports not to fail</script>
+
+    <script type="text/javascript" src="js/jquery.js"></script>
+    <script type='text/javascript' src='js/angular.js'></script>
+    <script type='text/javascript' src='js/firebase.js'></script>
+    <script type='text/javascript' src='js/angularfire.js'></script>
+    <script type='text/javascript' src='js/angular-sanitize.js'></script>
+    <script type='text/javascript' src='js/battlescripts-app.js'></script>
+    <script type='text/javascript' src='js/Match.js'></script>
+
+    <script type="text/javascript" src="/lib/codemirror-3.20/lib/codemirror.js"></script>
+    <script type="text/javascript" src="/lib/codemirror-3.20/mode/javascript/javascript.js"></script>
+    <link rel="stylesheet" href="/lib/codemirror-3.20/lib/codemirror.css" />
+    <link rel="stylesheet" href="/lib/codemirror-3.20/theme/mdn-like.css" />
+    <script type='text/javascript' src='js/micromarkdown.js'></script>
+
+    <script>
+      bsapp.controller("ScreenController", ["$scope", "$battlescripts", "$queryparam", "$compile", "$rootScope", function($scope, $battlescripts, $queryparam, $compile, $rootScope) {
+        $scope.players=[];
+
+        // Initial Load
+        // ------------
+
+        $battlescripts.login().then((user)=>$battlescripts.get_my_players())
+        .then((players)=>{
+          $scope.players=players;
+          $scope.$apply();
+        })
+        .catch((err) => $scope.console.log("<span>[Error]</span> Unable to retrieve players: "+err.toString(),"error"))
+      }]);
+
+    </script>
+    <style>
+
+        .title {
+            font-size:150%;
+            font-weight:bold;
+        }
+
+    /* FLEXBOX Layout stolen from the web */
+    html, body, .viewport {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+    }
+
+    </style>
+</head>
+
+<body class="vbox" ng-app="battlescripts" ng-controller="ScreenController">
+<div class=" header">
+    <div class="title"><a href="/">BattleScripts</a> / Dashboard</div>
+</div>
+<div style="margin:10px;">
+    <div>My Players:</div>
+    <div ng-repeat="p in players">
+        <a href="player.html?game_id={{p.game_id}}&id={{p.$id}}">{{p.name}} (Game: {{p.game_id}})</a>
+    </div>
+</div>
+
+</body>
+</html>
