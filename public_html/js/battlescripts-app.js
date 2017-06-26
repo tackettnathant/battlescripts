@@ -133,14 +133,6 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
     projectId: "battlescripts-161a3",
     storageBucket: "battlescripts-161a3.appspot.com",
     messagingSenderId: "877337823986"
-    /*
-    apiKey: "AIzaSyAwQvAx4apZtW4fa3nLYeoy5wAEohQohj0",
-    authDomain: "battlescripts-eb59b.firebaseapp.com",
-    databaseURL: "https://battlescripts-eb59b.firebaseio.com",
-    projectId: "battlescripts-eb59b",
-    storageBucket: "battlescripts-eb59b.appspot.com",
-    messagingSenderId: "1029158174849"
-    */
   };
   firebase.initializeApp(config);
   var gameRef=firebase.database().ref().child("games");
@@ -160,6 +152,14 @@ bsapp.factory('$battlescripts', ["$firebaseArray", "$firebaseObject","$firebaseA
         resolve(api.user);
       }).catch((err)=>{
         reject(err);
+      });
+    });
+  };
+  api.get_user = function() {
+    return new Promise((resolve)=>{
+      if (api.user) { resolve(api.user); }
+      firebase.auth().onAuthStateChanged(function (user) {
+        if (user) { resolve(user); }
       });
     });
   };
